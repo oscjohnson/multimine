@@ -55,8 +55,9 @@ jQuery(document).ready(function($) {
 
 	function printletter(x,y, content){
 		context.fillStyle = "#000000";
-		context.font = "bold 18px Arial";
-  		context.fillText(content, 10 + x*sizepadding, 22 + y*sizepadding);
+		var fontsize = Math.round(0.6*size)+ "px";
+		context.font = "bold "+ fontsize +" Arial";
+  		context.fillText(content, Math.round(0.33*size) + x*sizepadding, Math.round(0.73*size) + y*sizepadding);
 	}
 
 

@@ -1,0 +1,21 @@
+Functional specification:
+-------------------------
+
+The aim of this project is to create a multiplayer mine sweeper. It should be possible to join existing games and play instantly. There should also be a lobby function where people can join and the host can start the game. To get access to the game, you must log in using for example facebook. 
+
+
+Technological specification:
+----------------------------
+
+We are considering using meteor.js with angular.js. But are not sure of how well they would interact.
+
+We're not sure if angular is necessary in this project because the functionality of meteor seems to suffice for our needs on both client- and serverside.
+
+Meteor provides data storage through MongoDB which we will use so the clients can get their game data.
+
+Authentication will be handled with the use of Facebook OAuth service.
+
+All clients will have the same functionality except the host of a game who will decide when to start a game but this the only thing that makes the host differ from the others.
+
+We are considering using a testing framework like Q-unit, but will do some research before deciding. 
+

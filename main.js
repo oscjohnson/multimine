@@ -3,6 +3,7 @@ jQuery(document).ready(function($) {
 	var canvas = document.getElementById('board');
 	var context = canvas.getContext("2d");
 	var MINE =1;
+	var showMines = true;
 
 	var width = 24;
 	var height = 18;
@@ -34,21 +35,34 @@ jQuery(document).ready(function($) {
 			board.push(new Array(height))
 		};
 
-		placeMines();
 		
+		var a = placeMines(mineSize);
+		console.log(a)
 	}
 
 
-	function placeMines(){
-		var r = randomXY();
+	function placeMines(mineSize){
+		var mineCounter = 0;
 
-		if(board[r.x][r.y] == undefined && (mineCounter < mineSize) ){
-			board[r.x][r.y] =1;
-			mineCounter++;
-			return placeMines();
-		}else{
-			return;
+		while( mineCounter < mineSize ){
+			if(placeMine()){
+				mineCounter++;
+			}
 		}
+
+		function placeMine(){
+			var r = randomXY();
+			if(board[r.x][r.y] == undefined){
+				board[r.x][r.y]= 1;
+				return true;
+			}else{
+				return false;
+			}
+
+
+		}
+
+		return mineCounter;
 
 	}
 
@@ -76,9 +90,15 @@ jQuery(document).ready(function($) {
 	    var xBoard  = Math.ceil(x / sizepadding)-1;
 	    var yBoard  = Math.ceil(y / sizepadding)-1;
 
-	    var mines = checkSurroundingsForMines({x:xBoard, y:yBoard});
+	    var mines;
+		if(board[xBoard][yBoard] == 1){
+			fillSquare(xBoard, yBoard, '#DD0000');
+		
+		}else{
+	    	mines= checkSurroundingsForMines({x:xBoard, y:yBoard});
+	    	printletter(xBoard, yBoard,mines);
+		}
 
-	    printletter(xBoard, yBoard,mines);
 
 	}
 
@@ -105,6 +125,7 @@ jQuery(document).ready(function($) {
 
 		//console.log("("+ xstart+"," +ystart+") : (" +xstop+","+ystop+")" )
 
+
 		for (var i = xstart-1; i <= xstop+1; i++) {
 			for (var j = ystart-1; j <= ystop+1; j++) {
 				if(board[i][j] == 1){
@@ -115,18 +136,29 @@ jQuery(document).ready(function($) {
 		return counter;
 	}
 
+	function fillSquare(x,y,color){
+		context.fillStyle = color;
+		context.fillRect(x*sizepadding, y*sizepadding, size, size);
+	}
+
 	function drawBoard(){
 
 		for (var i = 0; i < width; i++) {
 			for (var j = 0; j < height; j++) {
-				if(board[i][j] == 1){
-				context.fillStyle = "#000000";
-				context.fillRect(i*sizepadding, j*sizepadding, size, size);
-					
+				if(showMines){
+					if(board[i][j] == 1){
+					context.fillStyle = "#000000";
+					context.fillRect(i*sizepadding, j*sizepadding, size, size);
+						
+					}else{
+						
+					context.fillStyle = "#AAAAAA";
+					context.fillRect(i*sizepadding, j*sizepadding, size, size);
+					}
 				}else{
-					
-				context.fillStyle = "#AAAAAA";
-				context.fillRect(i*sizepadding, j*sizepadding, size, size);
+					context.fillStyle = "#AAAAAA";
+					context.fillRect(i*sizepadding, j*sizepadding, size, size);
+
 				}
 			};
 		};

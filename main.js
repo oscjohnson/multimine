@@ -1,4 +1,3 @@
-jQuery(document).ready(function($) {
 	
 	var canvas = document.getElementById('board');
 	var context = canvas.getContext("2d");
@@ -36,8 +35,8 @@ jQuery(document).ready(function($) {
 		};
 
 		
-		var a = placeMines(mineSize);
-		console.log(a)
+		placeMines(mineSize);
+		
 	}
 
 
@@ -165,4 +164,3 @@ jQuery(document).ready(function($) {
 	}
 
 
-});

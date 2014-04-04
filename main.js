@@ -1,40 +1,37 @@
 	
 	var canvas = document.getElementById('board');
 	var context = canvas.getContext("2d");
-	var MINE =1;
-	var showMines = true;
 
+	//Settings
+	var showMines = false;
 	var width = 24;
 	var height = 18;
-	var padding = 2;
+	var padding = 3;
 	var size = 30;
 	var sizepadding = size + padding;
-	var mineSize = 10;
+	var mineSize = 50;
+	//Settings END
 
 
 	canvas.addEventListener('click', boardClick, false);
+	canvas.addEventListener('contextmenu', boardRightClick, false);
 
 	var board = [];
-	var mineCounter = 0;
-
-
-
+	var checkBoard = [];
 		
 	createBoard();	
-
 	drawBoard();
-
-
-
 
 
 	function createBoard(){
 		//create the array
 		for (var i = 0; i < width; i++) {
 			board.push(new Array(height))
+			checkBoard.push(new Array(height))
 		};
 
-		
+	
+
 		placeMines(mineSize);
 		
 	}
@@ -79,7 +76,15 @@
 		var y = Math.floor(Math.random()*height);
 		return {x:x,y:y};
 	}
+	function boardRightClick(ev){
+		ev.preventDefault();
+		var x = ev.clientX - canvas.offsetLeft;
+	    var y = ev.clientY - canvas.offsetTop;
+	    var xBoard  = Math.ceil(x / sizepadding)-1;
+	    var yBoard  = Math.ceil(y / sizepadding)-1;
 
+		fillSquare(xBoard, yBoard, '#00DD00');
+	}
 
 	function boardClick(ev) 
 	{
@@ -94,10 +99,65 @@
 			fillSquare(xBoard, yBoard, '#DD0000');
 		
 		}else{
-	    	mines= checkSurroundingsForMines({x:xBoard, y:yBoard});
-	    	printletter(xBoard, yBoard,mines);
+	    	discoverField({x:xBoard, y:yBoard});
 		}
 
+
+	}
+
+	function outputSquare(x,y){
+		var num = checkSurroundingsForMines({x:x, y:y});
+
+		if(board[x][y] == '1'){
+			fillSquare(x, y, '#DD0000');
+		}
+		else if(num == 0){
+			fillSquare(x, y, '#DDDDDD');	
+		}
+		else{
+			fillSquare(x, y, '#AAAAAA');
+			printletter(x,y, num)
+		}
+	}
+
+	function discoverField(clickedSquare){
+		var number =checkSurroundingsForMines(clickedSquare);
+
+		if(number == 0){
+			// Propagera, checkSurroundingsForMines
+			var xstart = clickedSquare.x;
+			var ystart = clickedSquare.y;
+			var xstop = clickedSquare.x;
+			var ystop = clickedSquare.y;
+
+			if (clickedSquare.x == 0) {
+				xstart =1;
+			}
+			if(clickedSquare.y ==0){
+				ystart= 1;
+			}
+
+			if (clickedSquare.x == width-1) {
+				xstop =clickedSquare.x-1;
+			}
+			if(clickedSquare.y ==height-1){
+				ystop= clickedSquare.y-1;
+			}
+
+
+			for (var i = xstart-1; i <= xstop+1; i++) {
+				for (var j = ystart-1; j <= ystop+1; j++) {
+					if(checkBoard[i][j] !== 'x'){
+						checkBoard[i][j] = 'x';
+						discoverField({x:i,y:j});
+					}
+				};
+			};
+
+		}	
+
+		outputSquare(clickedSquare.x, clickedSquare.y, number);
+		
 
 	}
 
@@ -122,9 +182,6 @@
 			ystop= square.y-1;
 		}
 
-		//console.log("("+ xstart+"," +ystart+") : (" +xstop+","+ystop+")" )
-
-
 		for (var i = xstart-1; i <= xstop+1; i++) {
 			for (var j = ystart-1; j <= ystop+1; j++) {
 				if(board[i][j] == 1){
@@ -132,6 +189,7 @@
 				}
 			};	
 		};
+
 		return counter;
 	}
 

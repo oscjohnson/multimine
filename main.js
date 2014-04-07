@@ -2,35 +2,57 @@
 	var canvas = document.getElementById('board');
 	var context = canvas.getContext("2d");
 
-	//Settings
-	var showMines = false;
-	var width = 24;
-	var height = 18;
-	var padding = 3;
-	var size = 30;
-	var sizepadding = size + padding;
-	var mineSize = 50;
-	//Settings END
 
+	var showMines;
+	var width;
+	var height;
+	var padding;
+	var size;
+	var sizepadding;
+	var mineSize;
+	var board = [];
+	var checkBoard = [];
+
+	var defaultsettings = {
+		showMines: false,
+		width: 24,
+		height: 18,
+		padding: 3,
+		size: 35,
+		sizepadding: function(){return this.size+this.padding;},
+		mineSize: 50
+	}
 
 	canvas.addEventListener('click', boardClick, false);
 	canvas.addEventListener('contextmenu', boardRightClick, false);
 
-	var board = [];
-	var checkBoard = [];
+	function init(settings){
+		context.clearRect(0, 0, canvas.width, canvas.height);
+		board = [];
+		checkBoard = [];
+
+		$.extend(defaultsettings, settings);
 		
-	createBoard();	
-	drawBoard();
+		showMines = defaultsettings.showMines;
+		width = defaultsettings.width;
+		height = defaultsettings.height;
+		padding = defaultsettings.padding;
+		size = defaultsettings.size;
+		sizepadding = defaultsettings.sizepadding();
+		mineSize = defaultsettings.mineSize;
+
+		createBoard();	
+		drawBoard();
+	}
+	init();
 
 
 	function createBoard(){
-		//create the array
+
 		for (var i = 0; i < width; i++) {
 			board.push(new Array(height))
 			checkBoard.push(new Array(height))
 		};
-
-	
 
 		placeMines(mineSize);
 		
@@ -101,7 +123,6 @@
 		}else{
 	    	discoverField({x:xBoard, y:yBoard});
 		}
-
 
 	}
 
@@ -221,4 +242,19 @@
 		};
 	}
 
+	function clearBoard(){
+		for (var i = 0; i < width; i++) {
+			for (var j = 0; j < height; j++) {
+				fillSquare(i,j,"#AAAAAA");
+				checkBoard[i][j] = undefined;
+			}
+		}
+	}
 
+	function removeMines(){
+		for (var i = 0; i < width; i++) {
+			for (var j = 0; j < height; j++) {
+				board[i][j] = undefined;
+			}
+		}
+	}

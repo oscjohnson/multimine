@@ -1,0 +1,24 @@
+<body>
+	<h1>My favorite colors</h1>
+  {{> color_list}}
+</body>
+
+<template name="color_list">
+{{#each colors}}
+	<ul>
+		{{> color_info}}
+	</ul>
+{{else}}
+ No colors yet.
+{{/each}}
+	<div class="footer">
+		<button>Like!</button>
+	</div>
+</template>
+
+
+<template name="color_info">
+<li class="{{maybe_selected}}">
+	{{name}} ({{likes}})
+</li>
+</template>

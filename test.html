@@ -1,0 +1,16 @@
+<body>
+
+	<h1>Multimine</h1>
+  	{{> game}}
+</body>
+
+<template name="game">
+	<canvas id="gameCanvas" width="200" height="200"></canvas>
+	<script>
+		var canvas=document.getElementById('gameCanvas');
+		var ctx=canvas.getContext('2d');
+		ctx.fillStyle='#DDDDDD';
+		ctx.fillRect(0,0,200,200);
+	</script>
+</template>
+

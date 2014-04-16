@@ -47,7 +47,7 @@
 	init();
 
 
-	function createBoard(){
+	function createBoar(){
 
 		for (var i = 0; i < width; i++) {
 			board.push(new Array(height))

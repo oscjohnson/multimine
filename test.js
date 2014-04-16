@@ -1,31 +1,49 @@
-Colors = new Meteor.Collection("colors");
+Game = new Meteor.Collection("game");
+
+
 
 if (Meteor.isClient) {
-	Template.color_list.colors = function () {
-		//return Colors.find({}, {sort:{likes: -1, name:1}});
-		return [{name: "Oscar"}, {name: "Auguest"}];
-	};
 
-	Template.color_list.events = {
-		'click button': function () {
-			
-			Colors.update(Session.get('session_color'), {$inc: {likes:1}});
-		}
-	};
 
-	Template.color_list.maybe_selected = function(){
-		return Session.equals('session_color', this._id) ? "selected" : "";
-	}
+	Meteor.startup(function() {
+		console.log('startup')
+    	Session.set('data_loaded', false); 
+  	}); 
 
-	Template.color_info.events = {
-		'click' : function(){
-			Session.set('session_color', this._id);
-		}
-	}
+  	Meteor.subscribe('game', function(){
+  		console.log('subscribe done.')
+		game = Game.findOne({ _id: "Ww3CKX2ZCSE3MSX35"});
+		console.log(game.board)
+		// Game.update({_id: "Ww3CKX2ZCSE3MSX35"}, board: "");	
+    	
+  	});
+  	Template.game.events({
+  		'click #gameCanvas' : function(e){
+  			//console.log(e.pageX, e.pageY);
+  			Meteor.call("update", e.pageX, e.pageY);
+  		}
+  		
+  	})
+  	
 }
 
-//if (Meteor.isServer) {
-//	Meteor.startup(function () {
+
+
+if (Meteor.isServer) {
+
+	Meteor.methods({
+		update: function(x,y){
+			Game = Meteor.Collection('game');
+			Game.update();
+		}
+	});
+
+	Meteor.publish('game', function(args){
+		return Game.find();
+	});
+
+	Meteor.startup(function () {
+		console.log('server startup')
 		// code to run on server at startup
-//	});
-//}
+	});
+}

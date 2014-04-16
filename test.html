@@ -1,24 +1,16 @@
 <body>
-	<h1>My favorite colors</h1>
-  {{> color_list}}
+
+	<h1>Multimine</h1>
+  	{{> game}}
 </body>
 
-<template name="color_list">
-{{#each colors}}
-	<ul>
-		{{> color_info}}
-	</ul>
-{{else}}
- No colors yet.
-{{/each}}
-	<div class="footer">
-		<button>Like!</button>
-	</div>
+<template name="game">
+	<canvas id="gameCanvas" width="200" height="200"></canvas>
+	<script>
+		var canvas=document.getElementById('gameCanvas');
+		var ctx=canvas.getContext('2d');
+		ctx.fillStyle='#DDDDDD';
+		ctx.fillRect(0,0,200,200);
+	</script>
 </template>
 
-
-<template name="color_info">
-<li class="{{maybe_selected}}">
-	{{name}} ({{likes}})
-</li>
-</template>

@@ -20,13 +20,32 @@ if (Meteor.isClient) {
     	Session.set('data_loaded', false); 
   	}); 
 
-  	Meteor.subscribe('game', function(){
+  	Meteor.subscribe('game', function(){ 
   		console.log('subscribe done.')
-		game = Game.find({ }).fetch()[0];
-		console.log(game)
+
+		
+		game =  Game.find({ }).fetch()[0];
+
 		board = game.board;
 		renderBoard(board);
+
   	});
+
+  	Deps.autorun(function(){
+  		console.log('autorun')
+  		var change = Game.find({"hostName": "Ogge"}).fetch()[0];
+  		if(change !== undefined){
+
+  			console.log(change.board)
+  			renderBoard(change.board)
+  		}else{
+  			console.log("start")
+  		}
+
+
+
+  	})
+
   	Template.game.events({
   		'click #gameCanvas' : function(e){
 
@@ -34,11 +53,21 @@ if (Meteor.isClient) {
   			var boardcoordinates = getBoardXY(c);
 
   			// updateBoardOnServer(c);
-  			Meteor.call('updateBoard','AggeFan',boardcoordinates.x, boardcoordinates.y);
+  			Meteor.call('updateBoard','Ogge',boardcoordinates.x, boardcoordinates.y);
   			// fillSquare(boardcoordinates.x, boardcoordinates.y, randomRGB());
+
   		}
   		
   	});
+
+	Deps.autorun(function(){
+		var ready = Game.find({});
+		if(ready){
+			Meteor.subscribe('game');
+		}
+	
+	});
+
 
   	Template.game.rendered = function() {
   		//$('#gameCanvas').attr('width', window.innerWidth);
@@ -56,7 +85,7 @@ if (Meteor.isClient) {
 // Functions
 
 function renderBoard(board){
-
+	console.log('renderBoard')
 	for (var i = 0; i < board.length; i++) {
 		var color;
 
@@ -70,7 +99,6 @@ function renderBoard(board){
 
 		x = + arr[0]
 		y = + arr[1]
-		console.log(x,y)
 
 		fillSquare( x, y, color);
 
@@ -151,12 +179,12 @@ if (Meteor.isServer) {
 			var xy = x +"_"+ y;
 			Game.update({hostName: _hostName, "board.pos" : xy},
 						{$set: {"board.$.val": 1}});
-		     // console.log("UPDATED "+ _hostName +" with x:" + x +" y:" + y);
+
 		}
 	});
 
 	Meteor.publish('game', function(args){
-		return Game.find({"hostName": "AggeFan"});
+		return Game.find({"hostName": "Ogge"});
 	});
 
 	Meteor.startup(function () {
@@ -164,6 +192,9 @@ if (Meteor.isServer) {
 		console.log('server startup')
 		// code to run on server at startup
 	});
+
+
+
 }
 
 function generateMine(){

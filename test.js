@@ -135,7 +135,7 @@ if (Meteor.isServer) {
 			var _board = [];
 			for(var i = 0; i < ROWS; i++){
 				for(var j = 0; j < COLUMNS; j++){
-				_board.push({"x": i, "y": j, "val": 0})
+				_board.push({"x": i, "y": j, "val": 0, "checked": false})
 				}
 			}
 			var gameID = Game.insert({hostName: _gameName, hostName: _hostName,
@@ -148,6 +148,9 @@ if (Meteor.isServer) {
 			Game.update({hostName : _hostName, board: { $elemMatch: { "x": x, "y": y } } },
 								 { $set: { "board.$.val" : 1 }});
 		     // console.log("UPDATED "+ _hostName +" with x:" + x +" y:" + y);
+		},
+		clearBoard: function(_hostName){
+			Game.remove({hostName: _hostName});
 		}
 	});
 

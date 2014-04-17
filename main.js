@@ -1,37 +1,38 @@
-	
-	// var canvas = document.getElementById('board');
-	// var context = canvas.getContext("2d");
+
+/*
+	var canvas = document.getElementById('board');
+	var context = canvas.getContext("2d");
 
 
-	// var showMines;
-	// var width;
-	// var height;
-	// var padding;
-	// var size;
-	// var sizepadding;
-	// var mineSize;
-	// var board = [];
-	// var checkBoard = [];
+	var showMines;
+	var width;
+	var height;
+	var padding;
+	var size;
+	var sizepadding;
+	var mineSize;
+	var board = [];
+	var checkBoard = [];
 
-	// var defaultsettings = {
-	// 	showMines: false,
-	// 	width: 24,
-	// 	height: 18,
-	// 	padding: 3,
-	// 	size: 35,
-	// 	sizepadding: function(){return this.size+this.padding;},
-	// 	mineSize: 50
-	// }
+	var defaultsettings = {
+		showMines: false,
+		width: 24,
+		height: 18,
+		padding: 3,
+		size: 35,
+		sizepadding: function(){return this.size+this.padding;},
+		mineSize: 50
+	}
 
-	// canvas.addEventListener('click', boardClick, false);
-	// canvas.addEventListener('contextmenu', boardRightClick, false);
+	canvas.addEventListener('click', boardClick, false);
+	canvas.addEventListener('contextmenu', boardRightClick, false);
 
-	// function init(settings){
-	// 	context.clearRect(0, 0, canvas.width, canvas.height);
-	// 	board = [];
-	// 	checkBoard = [];
+	function init(settings){
+		context.clearRect(0, 0, canvas.width, canvas.height);
+		board = [];
+		checkBoard = [];
 
-	// 	$.extend(defaultsettings, settings);
+		$.extend(defaultsettings, settings);
 		
 	// 	showMines = defaultsettings.showMines;
 	// 	width = defaultsettings.width;
@@ -47,7 +48,7 @@
 	// init();
 
 
-	// function createBoar(){
+	function createBoard(){
 
 	// 	for (var i = 0; i < width; i++) {
 	// 		board.push(new Array(height))
@@ -84,13 +85,13 @@
 
 	// }
 
-
-	// function printletter(x,y, content){
-	// 	context.fillStyle = "#000000";
-	// 	var fontsize = Math.round(0.6*size)+ "px";
-	// 	context.font = "bold "+ fontsize +" Arial";
- //  		context.fillText(content, Math.round(0.33*size) + x*sizepadding, Math.round(0.73*size) + y*sizepadding);
-	// }
+	/*
+	function printletter(x,y, content){
+		context.fillStyle = "#000000";
+		var fontsize = Math.round(0.6*size)+ "px";
+		context.font = "bold "+ fontsize +" Arial";
+  		context.fillText(content, Math.round(0.33*size) + x*sizepadding, Math.round(0.73*size) + y*sizepadding);
+	}
 
 
 	// function randomXY(){
@@ -180,81 +181,82 @@
 	// 	outputSquare(clickedSquare.x, clickedSquare.y, number);
 		
 
-	// }
+	}
 
-	// function checkSurroundingsForMines(square){
-	// 	var xstart = square.x;
-	// 	var ystart = square.y;
-	// 	var xstop = square.x;
-	// 	var ystop = square.y;
-	// 	var counter = 0;
+	function checkSurroundingsForMines(square){
+		var xstart = square.x;
+		var ystart = square.y;
+		var xstop = square.x;
+		var ystop = square.y;
+		var counter = 0;
 
-	// 	if (square.x == 0) {
-	// 		xstart =1;
-	// 	}
-	// 	if(square.y ==0){
-	// 		ystart= 1;
-	// 	}
+		if (square.x == 0) {
+			xstart =1;
+		}
+		if(square.y ==0){
+			ystart= 1;
+		}
 
-	// 	if (square.x == width-1) {
-	// 		xstop =square.x-1;
-	// 	}
-	// 	if(square.y ==height-1){
-	// 		ystop= square.y-1;
-	// 	}
+		if (square.x == width-1) {
+			xstop =square.x-1;
+		}
+		if(square.y ==height-1){
+			ystop= square.y-1;
+		}
 
-	// 	for (var i = xstart-1; i <= xstop+1; i++) {
-	// 		for (var j = ystart-1; j <= ystop+1; j++) {
-	// 			if(board[i][j] == 1){
-	// 				counter++;
-	// 			}
-	// 		};	
-	// 	};
+		for (var i = xstart-1; i <= xstop+1; i++) {
+			for (var j = ystart-1; j <= ystop+1; j++) {
+				if(board[i][j] == 1){
+					counter++;
+				}
+			};	
+		};
 
-	// 	return counter;
-	// }
+		return counter;
+	}
 
-	// function fillSquare(x,y,color){
-	// 	context.fillStyle = color;
-	// 	context.fillRect(x*sizepadding, y*sizepadding, size, size);
-	// }
+	function fillSquare(x,y,color){
+		context.fillStyle = color;
+		context.fillRect(x*sizepadding, y*sizepadding, size, size);
+	}
+	
+	function drawBoard(){
 
-	// function drawBoard(){
-
-	// 	for (var i = 0; i < width; i++) {
-	// 		for (var j = 0; j < height; j++) {
-	// 			if(showMines){
-	// 				if(board[i][j] == 1){
-	// 				context.fillStyle = "#000000";
-	// 				context.fillRect(i*sizepadding, j*sizepadding, size, size);
+		for (var i = 0; i < width; i++) {
+			for (var j = 0; j < height; j++) {
+				if(showMines){
+					if(board[i][j] == 1){
+					context.fillStyle = "#000000";
+					context.fillRect(i*sizepadding, j*sizepadding, size, size);
 						
 	// 				}else{
 						
-	// 				context.fillStyle = "#AAAAAA";
-	// 				context.fillRect(i*sizepadding, j*sizepadding, size, size);
-	// 				}
-	// 			}else{
-	// 				context.fillStyle = "#AAAAAA";
-	// 				context.fillRect(i*sizepadding, j*sizepadding, size, size);
+					context.fillStyle = "#AAAAAA";
+					context.fillRect(i*sizepadding, j*sizepadding, size, size);
+					}
+				}else{
+					context.fillStyle = "#AAAAAA";
+					context.fillRect(i*sizepadding, j*sizepadding, size, size);
 
-	// 			}
-	// 		};
-	// 	};
-	// }
+				}
+			};
+		};
+	}
+	
+	function clearBoard(){
+		for (var i = 0; i < width; i++) {
+			for (var j = 0; j < height; j++) {
+				fillSquare(i,j,"#AAAAAA");
+				checkBoard[i][j] = undefined;
+			}
+		}
+	}
 
-	// function clearBoard(){
-	// 	for (var i = 0; i < width; i++) {
-	// 		for (var j = 0; j < height; j++) {
-	// 			fillSquare(i,j,"#AAAAAA");
-	// 			checkBoard[i][j] = undefined;
-	// 		}
-	// 	}
-	// }
-
-	// function removeMines(){
-	// 	for (var i = 0; i < width; i++) {
-	// 		for (var j = 0; j < height; j++) {
-	// 			board[i][j] = undefined;
-	// 		}
-	// 	}
-	// }
+	function removeMines(){
+		for (var i = 0; i < width; i++) {
+			for (var j = 0; j < height; j++) {
+				board[i][j] = undefined;
+			}
+		}
+	}
+*/

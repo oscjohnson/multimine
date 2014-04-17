@@ -1,28 +1,23 @@
-Game = new Meteor.Collection("game");
+Game = new Meteor.Collection("games");
 
-
+const ROWS = 4;
+const COLUMNS = 4;
 
 if (Meteor.isClient) {
 
 
 	Meteor.startup(function() {
-		console.log('startup')
     	Session.set('data_loaded', false); 
   	}); 
 
-  	Meteor.subscribe('game', function(){
-  		console.log('subscribe done.')
-		game = Game.findOne({ _id: "Ww3CKX2ZCSE3MSX35"});
-		console.log(game.board)
-		// Game.update({_id: "Ww3CKX2ZCSE3MSX35"}, board: "");	
+  	Meteor.subscribe('game', function(){	
     	
   	});
   	Template.game.events({
   		'click #gameCanvas' : function(e){
-  			//console.log(e.pageX, e.pageY);
-  			Meteor.call("update", e.pageX, e.pageY);
+  			console.log(Game.find({}).fetch())
+  			Meteor.call("updateBoard", e.pageX, e.pageY);
   		}
-  		
   	})
   	
 }
@@ -33,8 +28,26 @@ if (Meteor.isServer) {
 
 	Meteor.methods({
 		update: function(x,y){
-			Game = Meteor.Collection('game');
-			Game.update();
+			console.log(x, y)
+		},
+		createBoard: function(_gameName, _hostName){
+
+			var _board = [];
+			for(var i = 0; i < ROWS; i++){
+				for(var j = 0; j < COLUMNS; j++){
+				_board.push({"x": i, "y": j, "val": generateMine()})
+				}
+			}
+			var gameID = Game.insert({gameName: _gameName, hostName: _hostName,
+				board: _board});
+			console.log("CREATED GAME")
+
+			return gameID;
+		},
+		updateBoard: function(_gameName, x, y){
+			Game.update({gameName: _gameName, "board.x": x, "board.y": y},
+						{$set: {"board.$.val": 3}});
+		     console.log("UPDATED BOARD")
 		}
 	});
 
@@ -46,4 +59,8 @@ if (Meteor.isServer) {
 		console.log('server startup')
 		// code to run on server at startup
 	});
+}
+
+function generateMine(){
+	return Math.round(Math.random());
 }

@@ -1,260 +1,260 @@
 	
-	var canvas = document.getElementById('board');
-	var context = canvas.getContext("2d");
+	// var canvas = document.getElementById('board');
+	// var context = canvas.getContext("2d");
 
 
-	var showMines;
-	var width;
-	var height;
-	var padding;
-	var size;
-	var sizepadding;
-	var mineSize;
-	var board = [];
-	var checkBoard = [];
+	// var showMines;
+	// var width;
+	// var height;
+	// var padding;
+	// var size;
+	// var sizepadding;
+	// var mineSize;
+	// var board = [];
+	// var checkBoard = [];
 
-	var defaultsettings = {
-		showMines: false,
-		width: 24,
-		height: 18,
-		padding: 3,
-		size: 35,
-		sizepadding: function(){return this.size+this.padding;},
-		mineSize: 50
-	}
+	// var defaultsettings = {
+	// 	showMines: false,
+	// 	width: 24,
+	// 	height: 18,
+	// 	padding: 3,
+	// 	size: 35,
+	// 	sizepadding: function(){return this.size+this.padding;},
+	// 	mineSize: 50
+	// }
 
-	canvas.addEventListener('click', boardClick, false);
-	canvas.addEventListener('contextmenu', boardRightClick, false);
+	// canvas.addEventListener('click', boardClick, false);
+	// canvas.addEventListener('contextmenu', boardRightClick, false);
 
-	function init(settings){
-		context.clearRect(0, 0, canvas.width, canvas.height);
-		board = [];
-		checkBoard = [];
+	// function init(settings){
+	// 	context.clearRect(0, 0, canvas.width, canvas.height);
+	// 	board = [];
+	// 	checkBoard = [];
 
-		$.extend(defaultsettings, settings);
+	// 	$.extend(defaultsettings, settings);
 		
-		showMines = defaultsettings.showMines;
-		width = defaultsettings.width;
-		height = defaultsettings.height;
-		padding = defaultsettings.padding;
-		size = defaultsettings.size;
-		sizepadding = defaultsettings.sizepadding();
-		mineSize = defaultsettings.mineSize;
+	// 	showMines = defaultsettings.showMines;
+	// 	width = defaultsettings.width;
+	// 	height = defaultsettings.height;
+	// 	padding = defaultsettings.padding;
+	// 	size = defaultsettings.size;
+	// 	sizepadding = defaultsettings.sizepadding();
+	// 	mineSize = defaultsettings.mineSize;
 
-		createBoard();	
-		drawBoard();
-	}
-	init();
+	// 	createBoard();	
+	// 	drawBoard();
+	// }
+	// init();
 
 
-	function createBoar(){
+	// function createBoar(){
 
-		for (var i = 0; i < width; i++) {
-			board.push(new Array(height))
-			checkBoard.push(new Array(height))
-		};
+	// 	for (var i = 0; i < width; i++) {
+	// 		board.push(new Array(height))
+	// 		checkBoard.push(new Array(height))
+	// 	};
 
-		placeMines(mineSize);
+	// 	placeMines(mineSize);
 		
-	}
+	// }
 
 
-	function placeMines(mineSize){
-		var mineCounter = 0;
+	// function placeMines(mineSize){
+	// 	var mineCounter = 0;
 
-		while( mineCounter < mineSize ){
-			if(placeMine()){
-				mineCounter++;
-			}
-		}
+	// 	while( mineCounter < mineSize ){
+	// 		if(placeMine()){
+	// 			mineCounter++;
+	// 		}
+	// 	}
 
-		function placeMine(){
-			var r = randomXY();
-			if(board[r.x][r.y] == undefined){
-				board[r.x][r.y]= 1;
-				return true;
-			}else{
-				return false;
-			}
-
-
-		}
-
-		return mineCounter;
-
-	}
+	// 	function placeMine(){
+	// 		var r = randomXY();
+	// 		if(board[r.x][r.y] == undefined){
+	// 			board[r.x][r.y]= 1;
+	// 			return true;
+	// 		}else{
+	// 			return false;
+	// 		}
 
 
-	function printletter(x,y, content){
-		context.fillStyle = "#000000";
-		var fontsize = Math.round(0.6*size)+ "px";
-		context.font = "bold "+ fontsize +" Arial";
-  		context.fillText(content, Math.round(0.33*size) + x*sizepadding, Math.round(0.73*size) + y*sizepadding);
-	}
+	// 	}
+
+	// 	return mineCounter;
+
+	// }
 
 
-	function randomXY(){
-		var x = Math.floor(Math.random()*width);
-		var y = Math.floor(Math.random()*height);
-		return {x:x,y:y};
-	}
-	function boardRightClick(ev){
-		ev.preventDefault();
-		var x = ev.clientX - canvas.offsetLeft;
-	    var y = ev.clientY - canvas.offsetTop;
-	    var xBoard  = Math.ceil(x / sizepadding)-1;
-	    var yBoard  = Math.ceil(y / sizepadding)-1;
+	// function printletter(x,y, content){
+	// 	context.fillStyle = "#000000";
+	// 	var fontsize = Math.round(0.6*size)+ "px";
+	// 	context.font = "bold "+ fontsize +" Arial";
+ //  		context.fillText(content, Math.round(0.33*size) + x*sizepadding, Math.round(0.73*size) + y*sizepadding);
+	// }
 
-		fillSquare(xBoard, yBoard, '#00DD00');
-	}
 
-	function boardClick(ev) 
-	{
+	// function randomXY(){
+	// 	var x = Math.floor(Math.random()*width);
+	// 	var y = Math.floor(Math.random()*height);
+	// 	return {x:x,y:y};
+	// }
+	// function boardRightClick(ev){
+	// 	ev.preventDefault();
+	// 	var x = ev.clientX - canvas.offsetLeft;
+	//     var y = ev.clientY - canvas.offsetTop;
+	//     var xBoard  = Math.ceil(x / sizepadding)-1;
+	//     var yBoard  = Math.ceil(y / sizepadding)-1;
+
+	// 	fillSquare(xBoard, yBoard, '#00DD00');
+	// }
+
+	// function boardClick(ev) 
+	// {
 		
-	    var x = ev.clientX - canvas.offsetLeft;
-	    var y = ev.clientY - canvas.offsetTop;
-	    var xBoard  = Math.ceil(x / sizepadding)-1;
-	    var yBoard  = Math.ceil(y / sizepadding)-1;
+	//     var x = ev.clientX - canvas.offsetLeft;
+	//     var y = ev.clientY - canvas.offsetTop;
+	//     var xBoard  = Math.ceil(x / sizepadding)-1;
+	//     var yBoard  = Math.ceil(y / sizepadding)-1;
 
-	    var mines;
-		if(board[xBoard][yBoard] == 1){
-			fillSquare(xBoard, yBoard, '#DD0000');
+	//     var mines;
+	// 	if(board[xBoard][yBoard] == 1){
+	// 		fillSquare(xBoard, yBoard, '#DD0000');
 		
-		}else{
-	    	discoverField({x:xBoard, y:yBoard});
-		}
+	// 	}else{
+	//     	discoverField({x:xBoard, y:yBoard});
+	// 	}
 
-	}
+	// }
 
-	function outputSquare(x,y){
-		var num = checkSurroundingsForMines({x:x, y:y});
+	// function outputSquare(x,y){
+	// 	var num = checkSurroundingsForMines({x:x, y:y});
 
-		if(board[x][y] == '1'){
-			fillSquare(x, y, '#DD0000');
-		}
-		else if(num == 0){
-			fillSquare(x, y, '#DDDDDD');	
-		}
-		else{
-			fillSquare(x, y, '#AAAAAA');
-			printletter(x,y, num)
-		}
-	}
+	// 	if(board[x][y] == '1'){
+	// 		fillSquare(x, y, '#DD0000');
+	// 	}
+	// 	else if(num == 0){
+	// 		fillSquare(x, y, '#DDDDDD');	
+	// 	}
+	// 	else{
+	// 		fillSquare(x, y, '#AAAAAA');
+	// 		printletter(x,y, num)
+	// 	}
+	// }
 
-	function discoverField(clickedSquare){
-		var number =checkSurroundingsForMines(clickedSquare);
+	// function discoverField(clickedSquare){
+	// 	var number =checkSurroundingsForMines(clickedSquare);
 
-		if(number == 0){
-			// Propagera, checkSurroundingsForMines
-			var xstart = clickedSquare.x;
-			var ystart = clickedSquare.y;
-			var xstop = clickedSquare.x;
-			var ystop = clickedSquare.y;
+	// 	if(number == 0){
+	// 		// Propagera, checkSurroundingsForMines
+	// 		var xstart = clickedSquare.x;
+	// 		var ystart = clickedSquare.y;
+	// 		var xstop = clickedSquare.x;
+	// 		var ystop = clickedSquare.y;
 
-			if (clickedSquare.x == 0) {
-				xstart =1;
-			}
-			if(clickedSquare.y ==0){
-				ystart= 1;
-			}
+	// 		if (clickedSquare.x == 0) {
+	// 			xstart =1;
+	// 		}
+	// 		if(clickedSquare.y ==0){
+	// 			ystart= 1;
+	// 		}
 
-			if (clickedSquare.x == width-1) {
-				xstop =clickedSquare.x-1;
-			}
-			if(clickedSquare.y ==height-1){
-				ystop= clickedSquare.y-1;
-			}
+	// 		if (clickedSquare.x == width-1) {
+	// 			xstop =clickedSquare.x-1;
+	// 		}
+	// 		if(clickedSquare.y ==height-1){
+	// 			ystop= clickedSquare.y-1;
+	// 		}
 
 
-			for (var i = xstart-1; i <= xstop+1; i++) {
-				for (var j = ystart-1; j <= ystop+1; j++) {
-					if(checkBoard[i][j] !== 'x'){
-						checkBoard[i][j] = 'x';
-						discoverField({x:i,y:j});
-					}
-				};
-			};
+	// 		for (var i = xstart-1; i <= xstop+1; i++) {
+	// 			for (var j = ystart-1; j <= ystop+1; j++) {
+	// 				if(checkBoard[i][j] !== 'x'){
+	// 					checkBoard[i][j] = 'x';
+	// 					discoverField({x:i,y:j});
+	// 				}
+	// 			};
+	// 		};
 
-		}	
+	// 	}	
 
-		outputSquare(clickedSquare.x, clickedSquare.y, number);
+	// 	outputSquare(clickedSquare.x, clickedSquare.y, number);
 		
 
-	}
+	// }
 
-	function checkSurroundingsForMines(square){
-		var xstart = square.x;
-		var ystart = square.y;
-		var xstop = square.x;
-		var ystop = square.y;
-		var counter = 0;
+	// function checkSurroundingsForMines(square){
+	// 	var xstart = square.x;
+	// 	var ystart = square.y;
+	// 	var xstop = square.x;
+	// 	var ystop = square.y;
+	// 	var counter = 0;
 
-		if (square.x == 0) {
-			xstart =1;
-		}
-		if(square.y ==0){
-			ystart= 1;
-		}
+	// 	if (square.x == 0) {
+	// 		xstart =1;
+	// 	}
+	// 	if(square.y ==0){
+	// 		ystart= 1;
+	// 	}
 
-		if (square.x == width-1) {
-			xstop =square.x-1;
-		}
-		if(square.y ==height-1){
-			ystop= square.y-1;
-		}
+	// 	if (square.x == width-1) {
+	// 		xstop =square.x-1;
+	// 	}
+	// 	if(square.y ==height-1){
+	// 		ystop= square.y-1;
+	// 	}
 
-		for (var i = xstart-1; i <= xstop+1; i++) {
-			for (var j = ystart-1; j <= ystop+1; j++) {
-				if(board[i][j] == 1){
-					counter++;
-				}
-			};	
-		};
+	// 	for (var i = xstart-1; i <= xstop+1; i++) {
+	// 		for (var j = ystart-1; j <= ystop+1; j++) {
+	// 			if(board[i][j] == 1){
+	// 				counter++;
+	// 			}
+	// 		};	
+	// 	};
 
-		return counter;
-	}
+	// 	return counter;
+	// }
 
-	function fillSquare(x,y,color){
-		context.fillStyle = color;
-		context.fillRect(x*sizepadding, y*sizepadding, size, size);
-	}
+	// function fillSquare(x,y,color){
+	// 	context.fillStyle = color;
+	// 	context.fillRect(x*sizepadding, y*sizepadding, size, size);
+	// }
 
-	function drawBoard(){
+	// function drawBoard(){
 
-		for (var i = 0; i < width; i++) {
-			for (var j = 0; j < height; j++) {
-				if(showMines){
-					if(board[i][j] == 1){
-					context.fillStyle = "#000000";
-					context.fillRect(i*sizepadding, j*sizepadding, size, size);
+	// 	for (var i = 0; i < width; i++) {
+	// 		for (var j = 0; j < height; j++) {
+	// 			if(showMines){
+	// 				if(board[i][j] == 1){
+	// 				context.fillStyle = "#000000";
+	// 				context.fillRect(i*sizepadding, j*sizepadding, size, size);
 						
-					}else{
+	// 				}else{
 						
-					context.fillStyle = "#AAAAAA";
-					context.fillRect(i*sizepadding, j*sizepadding, size, size);
-					}
-				}else{
-					context.fillStyle = "#AAAAAA";
-					context.fillRect(i*sizepadding, j*sizepadding, size, size);
+	// 				context.fillStyle = "#AAAAAA";
+	// 				context.fillRect(i*sizepadding, j*sizepadding, size, size);
+	// 				}
+	// 			}else{
+	// 				context.fillStyle = "#AAAAAA";
+	// 				context.fillRect(i*sizepadding, j*sizepadding, size, size);
 
-				}
-			};
-		};
-	}
+	// 			}
+	// 		};
+	// 	};
+	// }
 
-	function clearBoard(){
-		for (var i = 0; i < width; i++) {
-			for (var j = 0; j < height; j++) {
-				fillSquare(i,j,"#AAAAAA");
-				checkBoard[i][j] = undefined;
-			}
-		}
-	}
+	// function clearBoard(){
+	// 	for (var i = 0; i < width; i++) {
+	// 		for (var j = 0; j < height; j++) {
+	// 			fillSquare(i,j,"#AAAAAA");
+	// 			checkBoard[i][j] = undefined;
+	// 		}
+	// 	}
+	// }
 
-	function removeMines(){
-		for (var i = 0; i < width; i++) {
-			for (var j = 0; j < height; j++) {
-				board[i][j] = undefined;
-			}
-		}
-	}
+	// function removeMines(){
+	// 	for (var i = 0; i < width; i++) {
+	// 		for (var j = 0; j < height; j++) {
+	// 			board[i][j] = undefined;
+	// 		}
+	// 	}
+	// }

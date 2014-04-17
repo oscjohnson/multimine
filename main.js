@@ -1,4 +1,4 @@
-	
+/*
 	var canvas = document.getElementById('board');
 	var context = canvas.getContext("2d");
 
@@ -47,7 +47,7 @@
 	init();
 
 
-	function createBoar(){
+	function createBoard(){
 
 		for (var i = 0; i < width; i++) {
 			board.push(new Array(height))
@@ -84,7 +84,7 @@
 
 	}
 
-
+	/*
 	function printletter(x,y, content){
 		context.fillStyle = "#000000";
 		var fontsize = Math.round(0.6*size)+ "px";
@@ -218,7 +218,7 @@
 		context.fillStyle = color;
 		context.fillRect(x*sizepadding, y*sizepadding, size, size);
 	}
-
+	
 	function drawBoard(){
 
 		for (var i = 0; i < width; i++) {
@@ -241,7 +241,7 @@
 			};
 		};
 	}
-
+	
 	function clearBoard(){
 		for (var i = 0; i < width; i++) {
 			for (var j = 0; j < height; j++) {
@@ -258,3 +258,5 @@
 			}
 		}
 	}
+*/
+

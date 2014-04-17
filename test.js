@@ -15,6 +15,10 @@ const COLUMNS = 4;
 if (Meteor.isClient) {
 	var board;
 
+	Deps.autorun(function() {
+		Game.find().fetch();
+		console.log("hej")
+	});
 
 	Meteor.startup(function() {
     	Session.set('data_loaded', false); 
@@ -66,13 +70,8 @@ function renderBoard(board){
 			color= "#ddd";
 		}
 
-		var arr = board[i].pos.split("_");
 
-		x = + arr[0]
-		y = + arr[1]
-		console.log(x,y)
-
-		fillSquare( x, y, color);
+		fillSquare(board[i].x, board[i].y, color);
 
 	}
 }
@@ -134,11 +133,9 @@ if (Meteor.isServer) {
 		createBoard: function(_gameName, _hostName){
 
 			var _board = [];
-			var _pos = "";
 			for(var i = 0; i < ROWS; i++){
 				for(var j = 0; j < COLUMNS; j++){
-					_pos = i + "_" + j
-				_board.push({"pos": _pos, "val": 0})
+				_board.push({"x": i, "y": j, "val": 0})
 				}
 			}
 			var gameID = Game.insert({hostName: _gameName, hostName: _hostName,
@@ -148,9 +145,8 @@ if (Meteor.isServer) {
 			return gameID;
 		},
 		updateBoard: function(_hostName, x, y){
-			var xy = x +"_"+ y;
-			Game.update({hostName: _hostName, "board.pos" : xy},
-						{$set: {"board.$.val": 1}});
+			Game.update({hostName : _hostName, board: { $elemMatch: { "x": x, "y": y } } },
+								 { $set: { "board.$.val" : 1 }});
 		     // console.log("UPDATED "+ _hostName +" with x:" + x +" y:" + y);
 		}
 	});

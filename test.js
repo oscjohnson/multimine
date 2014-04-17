@@ -5,16 +5,20 @@ var size = 30;
 var padding = 3;
 var sizepadding = size + padding;
 
-var width = 4;
-var height = 4;
+var width ;
+var height ;
 
 
-const ROWS = 4;
-const COLUMNS = 4;
+// const ROWS = 4;
+// const COLUMNS = 4;
 
 if (Meteor.isClient) {
 	var board;
 
+	Deps.autorun(function() {
+		Game.find().fetch();
+
+	});
 
 	Meteor.startup(function() {
     	Session.set('data_loaded', false); 
@@ -32,14 +36,12 @@ if (Meteor.isClient) {
   	});
 
   	Deps.autorun(function(){
-  		console.log('autorun')
+
   		var change = Game.find({"hostName": "Ogge"}).fetch()[0];
   		if(change !== undefined){
 
-  			console.log(change.board)
+
   			renderBoard(change.board)
-  		}else{
-  			console.log("start")
   		}
 
 
@@ -76,8 +78,8 @@ if (Meteor.isClient) {
   		// console.log(board);
 
 
-  		$('#gameCanvas').attr('width', width*sizepadding);
-  		$('#gameCanvas').attr('height', height*sizepadding);
+  		// $('#gameCanvas').attr('width', width*sizepadding);
+  		// $('#gameCanvas').attr('height', height*sizepadding);
 		renderBoard(board);
 
 	};
@@ -95,12 +97,7 @@ function renderBoard(board){
 			color= "#ddd";
 		}
 
-		var arr = board[i].pos.split("_");
-
-		x = + arr[0]
-		y = + arr[1]
-
-		fillSquare( x, y, color);
+		fillSquare(board[i].x, board[i].y, color);
 
 	}
 }
@@ -157,16 +154,16 @@ if (Meteor.isServer) {
 
 	Meteor.methods({
 		update: function(x,y){
-			console.log(x, y)
+			// console.log(x, y)
 		},
-		createBoard: function(_gameName, _hostName){
+		createBoard: function(_gameName, _hostName, w, h){
+			width = w;
+			height = h;
 
 			var _board = [];
-			var _pos = "";
-			for(var i = 0; i < ROWS; i++){
-				for(var j = 0; j < COLUMNS; j++){
-					_pos = i + "_" + j
-				_board.push({"pos": _pos, "val": 0})
+			for(var i = 0; i < width; i++){
+				for(var j = 0; j < height; j++){
+				_board.push({"x": i, "y": j, "val": 0})
 				}
 			}
 			var gameID = Game.insert({hostName: _gameName, hostName: _hostName,
@@ -176,10 +173,14 @@ if (Meteor.isServer) {
 			return gameID;
 		},
 		updateBoard: function(_hostName, x, y){
-			var xy = x +"_"+ y;
-			Game.update({hostName: _hostName, "board.pos" : xy},
-						{$set: {"board.$.val": 1}});
 
+			Game.update({hostName : _hostName, board: { $elemMatch: { "x": x, "y": y } } },
+								 { $set: { "board.$.val" : 1 }});
+		     // console.log("UPDATED "+ _hostName +" with x:" + x +" y:" + y);
+
+		},
+		clearBoard: function(_hostName){
+			Game.remove({hostName: _hostName});
 		}
 	});
 

@@ -14,7 +14,6 @@ const COLUMNS = 4;
 
 if (Meteor.isClient) {
 	var board;
-	
 
 
 	Meteor.startup(function() {
@@ -35,7 +34,7 @@ if (Meteor.isClient) {
   			var boardcoordinates = getBoardXY(c);
 
   			// updateBoardOnServer(c);
-  			Meteor.call('updateBoard',boardcoordinates.x, boardcoordinates.y);
+  			Meteor.call('updateBoard','AggeFan',boardcoordinates.x, boardcoordinates.y);
   			// fillSquare(boardcoordinates.x, boardcoordinates.y, randomRGB());
   		}
   		
@@ -67,7 +66,13 @@ function renderBoard(board){
 			color= "#ddd";
 		}
 
-		fillSquare( board[i].x, board[i].y, color);
+		var arr = board[i].pos.split("_");
+
+		x = + arr[0]
+		y = + arr[1]
+		console.log(x,y)
+
+		fillSquare( x, y, color);
 
 	}
 }
@@ -129,26 +134,29 @@ if (Meteor.isServer) {
 		createBoard: function(_gameName, _hostName){
 
 			var _board = [];
+			var _pos = "";
 			for(var i = 0; i < ROWS; i++){
 				for(var j = 0; j < COLUMNS; j++){
-				_board.push({"x": i, "y": j, "val": generateMine()})
+					_pos = i + "_" + j
+				_board.push({"pos": _pos, "val": 0})
 				}
 			}
-			var gameID = Game.insert({gameName: _gameName, hostName: _hostName,
+			var gameID = Game.insert({hostName: _gameName, hostName: _hostName,
 				board: _board});
 			console.log("CREATED GAME")
 
 			return gameID;
 		},
-		updateBoard: function(_gameName, x, y){
-			Game.update({gameName: _gameName, "board.x": x, "board.y": y},
-						{$set: {"board.$.val": 3}});
-		     console.log("UPDATED BOARD")
+		updateBoard: function(_hostName, x, y){
+			var xy = x +"_"+ y;
+			Game.update({hostName: _hostName, "board.pos" : xy},
+						{$set: {"board.$.val": 1}});
+		     // console.log("UPDATED "+ _hostName +" with x:" + x +" y:" + y);
 		}
 	});
 
 	Meteor.publish('game', function(args){
-		return Game.find();
+		return Game.find({"hostName": "AggeFan"});
 	});
 
 	Meteor.startup(function () {

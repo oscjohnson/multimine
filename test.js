@@ -5,32 +5,43 @@ var size = 30;
 var padding = 3;
 var sizepadding = size + padding;
 
-var width = 4;
-var height = 4;
+var width ;
+var height ;
 
-
-const ROWS = 4;
-const COLUMNS = 4;
+var hostName ="AggeFan"
+// const ROWS = 4;
+// const COLUMNS = 4;
 
 if (Meteor.isClient) {
 	var board;
-
-	Deps.autorun(function() {
-		Game.find().fetch();
-		console.log("hej")
-	});
 
 	Meteor.startup(function() {
     	Session.set('data_loaded', false); 
   	}); 
 
-  	Meteor.subscribe('game', function(){
+  	Meteor.subscribe('game', function(){ 
   		console.log('subscribe done.')
-		game = Game.find({ }).fetch()[0];
-		console.log(game)
+
+		
+		game =  Game.find({ }).fetch()[0];
+
 		board = game.board;
 		renderBoard(board);
+
   	});
+
+  	Deps.autorun(function(){
+
+  		var change = Game.find({"hostName": hostName}).fetch()[0];
+  		if(change !== undefined){
+
+  			renderBoard(change.board)
+  		}
+
+
+
+  	})
+
   	Template.game.events({
   		'click #gameCanvas' : function(e){
 
@@ -38,11 +49,21 @@ if (Meteor.isClient) {
   			var boardcoordinates = getBoardXY(c);
 
   			// updateBoardOnServer(c);
-  			Meteor.call('updateBoard','AggeFan',boardcoordinates.x, boardcoordinates.y);
+  			Meteor.call('updateBoard', hostName,boardcoordinates.x, boardcoordinates.y);
   			// fillSquare(boardcoordinates.x, boardcoordinates.y, randomRGB());
+
   		}
   		
   	});
+
+	// Deps.autorun(function(){
+	// 	var ready = Game.find({});
+	// 	if(ready){
+	// 		Meteor.subscribe('game');
+	// 	}
+	
+	// });
+
 
   	Template.game.rendered = function() {
   		//$('#gameCanvas').attr('width', window.innerWidth);
@@ -51,8 +72,8 @@ if (Meteor.isClient) {
   		// console.log(board);
 
 
-  		$('#gameCanvas').attr('width', width*sizepadding);
-  		$('#gameCanvas').attr('height', height*sizepadding);
+  		// $('#gameCanvas').attr('width', width*sizepadding);
+  		// $('#gameCanvas').attr('height', height*sizepadding);
 		renderBoard(board);
 
 	};
@@ -60,19 +81,15 @@ if (Meteor.isClient) {
 // Functions
 
 function renderBoard(board){
+	console.log('renderBoard')
+	for(pos in board){
 
-	for (var i = 0; i < board.length; i++) {
 		var color;
+		var xy = pos.split("_");
 
-		if(board[i].val ==1){
-			color= "#333";
-		}else{
-			color= "#ddd";
-		}
+		(board[pos] == 1) ? color ="#333" : color = "#ddd";
 
-
-		fillSquare(board[i].x, board[i].y, color);
-
+		fillSquare(xy[0], xy[1], color);
 	}
 }
 
@@ -128,26 +145,40 @@ if (Meteor.isServer) {
 
 	Meteor.methods({
 		update: function(x,y){
-			console.log(x, y)
+			// console.log(x, y)
 		},
-		createBoard: function(_gameName, _hostName){
+		createBoard: function(_gameName, _hostName, w, h){
+			width = w;
+			height = h;
+			hostName = _hostName;
+			var pos = "";
 
-			var _board = [];
-			for(var i = 0; i < ROWS; i++){
-				for(var j = 0; j < COLUMNS; j++){
-				_board.push({"x": i, "y": j, "val": 0, "checked": false})
+			var _board = {};
+			for(var i = 0; i < width; i++){
+				for(var j = 0; j < height; j++){
+					pos = i + "_" + j;
+					_board[pos] = 0;
 				}
 			}
-			var gameID = Game.insert({hostName: _gameName, hostName: _hostName,
+			var gameID = Game.insert({hostName: hostName, hostName: _hostName,
 				board: _board});
 			console.log("CREATED GAME")
 
 			return gameID;
 		},
 		updateBoard: function(_hostName, x, y){
-			Game.update({hostName : _hostName, board: { $elemMatch: { "x": x, "y": y } } },
-								 { $set: { "board.$.val" : 1 }});
-		     // console.log("UPDATED "+ _hostName +" with x:" + x +" y:" + y);
+
+			var position = "board." + x + "_" + y;
+			// console.log(position)
+			// console.log(typeof position)
+			var action = {};
+			action[position] = 1
+// 
+			 Game.update({hostName: _hostName},{$set: action})
+			 // db.games.update({hostName: "AggeFan"},{$set: {"board.3_1" : 1}})
+
+
+		     console.log("UPDATED "+ _hostName + " with: " + position);
 		},
 		clearBoard: function(_hostName){
 			Game.remove({hostName: _hostName});
@@ -155,7 +186,7 @@ if (Meteor.isServer) {
 	});
 
 	Meteor.publish('game', function(args){
-		return Game.find({"hostName": "AggeFan"});
+		return Game.find({"hostName": hostName});
 	});
 
 	Meteor.startup(function () {
@@ -163,6 +194,9 @@ if (Meteor.isServer) {
 		console.log('server startup')
 		// code to run on server at startup
 	});
+
+
+
 }
 
 function generateMine(){

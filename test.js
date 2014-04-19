@@ -22,7 +22,6 @@ if (Meteor.isClient) {
   	Meteor.subscribe('game', function(){ 
   		console.log('subscribe done.')
 
-		
 		game =  Game.find({ }).fetch()[0];
 
 		board = game.board;
@@ -83,11 +82,10 @@ if (Meteor.isClient) {
 function renderBoard(board){
 	console.log('renderBoard')
 	for(pos in board){
-
 		var color;
 		var xy = pos.split("_");
 
-		(board[pos] == 1) ? color ="#333" : color = "#ddd";
+		(board[pos].checked == 1) ? color ="#333" : color = "#ddd";
 
 		fillSquare(xy[0], xy[1], color);
 	}
@@ -144,9 +142,6 @@ function randomRGB(){
 if (Meteor.isServer) {
 
 	Meteor.methods({
-		update: function(x,y){
-			// console.log(x, y)
-		},
 		createBoard: function(_gameName, _hostName, w, h){
 			width = w;
 			height = h;
@@ -157,7 +152,10 @@ if (Meteor.isServer) {
 			for(var i = 0; i < width; i++){
 				for(var j = 0; j < height; j++){
 					pos = i + "_" + j;
-					_board[pos] = 0;
+					var obj = {};
+					obj['checked'] = 0;
+					_board[pos] = obj;
+
 				}
 			}
 			var gameID = Game.insert({hostName: hostName, hostName: _hostName,
@@ -168,17 +166,18 @@ if (Meteor.isServer) {
 		},
 		updateBoard: function(_hostName, x, y){
 
-			var position = "board." + x + "_" + y;
-			// console.log(position)
-			// console.log(typeof position)
+			var key = "board." + x + "_" + y + ".checked";
+			// console.log(key)
+			// console.log(typeof key)
 			var action = {};
-			action[position] = 1
+			action[key] = 1
+			console.log(action)
 // 
 			 Game.update({hostName: _hostName},{$set: action})
 			 // db.games.update({hostName: "AggeFan"},{$set: {"board.3_1" : 1}})
 
 
-		     console.log("UPDATED "+ _hostName + " with: " + position);
+		     // console.log("UPDATED "+ _hostName + " with: " + position);
 		},
 		clearBoard: function(_hostName){
 			Game.remove({hostName: _hostName});

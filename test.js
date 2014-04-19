@@ -5,8 +5,8 @@ var size = 30;
 var padding = 3;
 var sizepadding = size + padding;
 
-var width ;
-var height ;
+var width =6;
+var height =6;
 
 var hostName ="AggeFan"
 // const ROWS = 4;
@@ -45,23 +45,17 @@ if (Meteor.isClient) {
   		'click #gameCanvas' : function(e){
 
   			var c = getCanvasCoordinates(e);
-  			var boardcoordinates = getBoardXY(c);
+  			var coord = getBoardXY(c);
 
-  			// updateBoardOnServer(c);
-  			Meteor.call('updateBoard', hostName,boardcoordinates.x, boardcoordinates.y);
+  			var surroundingMines = checkSurroundingsForMines({x:coord.x, y:coord.y})
+  			console.log(surroundingMines)
+  			printletter(coord.x, coord.y, surroundingMines);
+  			//Meteor.call('updateBoard', hostName,coord.x, coord.y);
   			// fillSquare(boardcoordinates.x, boardcoordinates.y, randomRGB());
 
   		}
   		
   	});
-
-	// Deps.autorun(function(){
-	// 	var ready = Game.find({});
-	// 	if(ready){
-	// 		Meteor.subscribe('game');
-	// 	}
-	
-	// });
 
 
   	Template.game.rendered = function() {
@@ -78,6 +72,15 @@ if (Meteor.isClient) {
 	};
 }
 // Functions
+function printletter(x,y, content){
+	var gameCanvas = $("#gameCanvas");
+	var context = gameCanvas[0].getContext('2d');
+	context.fillStyle = "#000000";
+	var fontsize = Math.round(0.6*size)+ "px";
+	context.font = "bold "+ fontsize +" Arial";
+	context.fillText(content, Math.round(0.33*size) + x*sizepadding, Math.round(0.73*size) + y*sizepadding);
+}
+
 
 function renderBoard(board){
 	console.log('renderBoard')
@@ -85,7 +88,8 @@ function renderBoard(board){
 		var color;
 		var xy = pos.split("_");
 
-		(board[pos].checked == 1) ? color ="#333" : color = "#ddd";
+		// (board[pos].checked == 1) ? color ="#333" : color = "#ddd";
+		(board[pos].isMine == 1) ? color ="#333" : color = "#ddd";
 
 		fillSquare(xy[0], xy[1], color);
 	}
@@ -137,7 +141,38 @@ function randomRGB(){
 	return "rgb("+r+","+g+","+b+")";
 }
 
+function checkSurroundingsForMines(square){
 
+		var xstart = square.x;
+		var ystart = square.y;
+		var xstop = square.x;
+		var ystop = square.y;
+		var counter = 0;
+
+		if (square.x == 0) {
+			xstart =1;
+		}
+		if(square.y ==0){
+			ystart= 1;
+		}
+
+		if (square.x == width) {
+			xstop =square.x-1;
+		}
+		if(square.y ==height){
+			ystop= square.y-1;
+		}
+		console.log("start: " + xstart + ","+ ystart+ "  -  " + " stop: " + ystop + "," + ystop)
+		for (var i = xstart-1; i <= xstop+1; i++) {
+			for (var j = ystart-1; j <= ystop+1; j++) {
+				if(board[i+'_'+j].isMine == 1){
+					counter++;
+				}
+			};	
+		};
+
+		return counter;
+	}
 
 if (Meteor.isServer) {
 
@@ -154,6 +189,7 @@ if (Meteor.isServer) {
 					pos = i + "_" + j;
 					var obj = {};
 					obj['checked'] = 0;
+					obj['isMine'] = Math.round(Math.random()*0.7);
 					_board[pos] = obj;
 
 				}

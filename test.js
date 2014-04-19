@@ -5,8 +5,8 @@ var size = 30;
 var padding = 3;
 var sizepadding = size + padding;
 
-var width =6;
-var height =6;
+var width ;
+var height;
 
 var hostName ="AggeFan"
 // const ROWS = 4;
@@ -31,10 +31,14 @@ if (Meteor.isClient) {
 
   	Deps.autorun(function(){
 
-  		var change = Game.find({"hostName": hostName}).fetch()[0];
-  		if(change !== undefined){
+  		var game = Game.find({"hostName": hostName}).fetch()[0];
+  		if(game !== undefined){
 
-  			renderBoard(change.board)
+  			renderBoard(game.board)
+  			width = game.width
+  			height = game.height
+
+
   		}
 
 
@@ -48,7 +52,7 @@ if (Meteor.isClient) {
   			var coord = getBoardXY(c);
 
   			var surroundingMines = checkSurroundingsForMines({x:coord.x, y:coord.y})
-  			console.log(surroundingMines)
+
   			printletter(coord.x, coord.y, surroundingMines);
   			//Meteor.call('updateBoard', hostName,coord.x, coord.y);
   			// fillSquare(boardcoordinates.x, boardcoordinates.y, randomRGB());
@@ -65,13 +69,19 @@ if (Meteor.isClient) {
   		// console.log(board);
 
 
-  		// $('#gameCanvas').attr('width', width*sizepadding);
-  		// $('#gameCanvas').attr('height', height*sizepadding);
+
+
+
 		renderBoard(board);
 
 	};
 }
 // Functions
+function rightCanvasSize(){
+	$('#gameCanvas').attr('width', width*sizepadding);
+	$('#gameCanvas').attr('height', height*sizepadding);
+}
+
 function printletter(x,y, content){
 	var gameCanvas = $("#gameCanvas");
 	var context = gameCanvas[0].getContext('2d');
@@ -142,7 +152,7 @@ function randomRGB(){
 }
 
 function checkSurroundingsForMines(square){
-
+		console.log(height)
 		var xstart = square.x;
 		var ystart = square.y;
 		var xstop = square.x;
@@ -156,10 +166,10 @@ function checkSurroundingsForMines(square){
 			ystart= 1;
 		}
 
-		if (square.x == width) {
+		if (square.x == width-1) {
 			xstop =square.x-1;
 		}
-		if(square.y ==height){
+		if(square.y ==height-1){
 			ystop= square.y-1;
 		}
 		console.log("start: " + xstart + ","+ ystart+ "  -  " + " stop: " + ystop + "," + ystop)
@@ -195,7 +205,7 @@ if (Meteor.isServer) {
 				}
 			}
 			var gameID = Game.insert({hostName: hostName, hostName: _hostName,
-				board: _board});
+				board: _board, width: w, height: h});
 			console.log("CREATED GAME")
 
 			return gameID;

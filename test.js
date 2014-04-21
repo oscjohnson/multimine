@@ -6,7 +6,8 @@ var padding = 3;
 var sizepadding = size + padding;
 
 var width ;
-var height;
+var height ;
+var game;
 
 var hostName ="AggeFan"
 // const ROWS = 4;
@@ -23,21 +24,21 @@ if (Meteor.isClient) {
   		console.log('subscribe done.')
 
 		game =  Game.find({ }).fetch()[0];
-
+		// rightCanvasSize(game.width, game.height);
 		board = game.board;
-		renderBoard(board);
+		//renderBoard(board);
 
   	});
 
   	Deps.autorun(function(){
 
-  		var game = Game.find({"hostName": hostName}).fetch()[0];
+  		game = Game.find({"hostName": hostName}).fetch()[0];
   		if(game !== undefined){
 
   			renderBoard(game.board)
   			width = game.width
   			height = game.height
-
+  			board = game.board;
 
   		}
 
@@ -51,10 +52,11 @@ if (Meteor.isClient) {
   			var c = getCanvasCoordinates(e);
   			var coord = getBoardXY(c);
 
-  			var surroundingMines = checkSurroundingsForMines({x:coord.x, y:coord.y})
+  			// checkSurroundingsForMines(board, {x:coord.x, y:coord.y});
 
-  			printletter(coord.x, coord.y, surroundingMines);
-  			//Meteor.call('updateBoard', hostName,coord.x, coord.y);
+  			discoverField(coord);
+
+  			Meteor.call('updateBoard', hostName,coord.x, coord.y);
   			// fillSquare(boardcoordinates.x, boardcoordinates.y, randomRGB());
 
   		}
@@ -63,28 +65,25 @@ if (Meteor.isClient) {
 
 
   	Template.game.rendered = function() {
-  		//$('#gameCanvas').attr('width', window.innerWidth);
-  		//$('#gameCanvas').attr('height' window.innerWidth);
 
-  		// console.log(board);
-
-
-
-
-
-		renderBoard(board);
+		//renderBoard(board);
 
 	};
 }
 // Functions
-function rightCanvasSize(){
-	$('#gameCanvas').attr('width', width*sizepadding);
-	$('#gameCanvas').attr('height', height*sizepadding);
+function rightCanvasSize(width, height){
+	var canvas =document.getElementById('gameCanvas');
+	canvas.width = width*sizepadding;
+	canvas.height = height*sizepadding;
+	//$('#gameCanvas').attr('width', width*sizepadding);
+	//$('#gameCanvas').attr('height', height*sizepadding);
 }
 
 function printletter(x,y, content){
 	var gameCanvas = $("#gameCanvas");
 	var context = gameCanvas[0].getContext('2d');
+
+	fillSquare(x,y, "#ddd")
 	context.fillStyle = "#000000";
 	var fontsize = Math.round(0.6*size)+ "px";
 	context.font = "bold "+ fontsize +" Arial";
@@ -93,17 +92,35 @@ function printletter(x,y, content){
 
 
 function renderBoard(board){
-	console.log('renderBoard')
+
 	for(pos in board){
+
 		var color;
 		var xy = pos.split("_");
+		var x = +xy[0]
+		var y = +xy[1]
+	
 
-		// (board[pos].checked == 1) ? color ="#333" : color = "#ddd";
-		(board[pos].isMine == 1) ? color ="#333" : color = "#ddd";
+		if(board[pos].checked ==1){
 
-		fillSquare(xy[0], xy[1], color);
+			if(board[pos].isMine ==1){
+				fillSquare(x, y, "#d00");
+			}else{
+				if(board[pos].surroundingMines == 0){
+					fillSquare(x,y, "ddd");
+				}else{
+					printletter(x, y, board[pos].surroundingMines);
+				}
+				
+			}
+
+		}else{
+			fillSquare(x, y, "#aaa");
+		}
+
 	}
 }
+
 
 function getCanvasCoordinates(e){
 	var x;
@@ -151,8 +168,11 @@ function randomRGB(){
 	return "rgb("+r+","+g+","+b+")";
 }
 
-function checkSurroundingsForMines(square){
-		console.log(height)
+
+
+function checkSurroundingsForMines(board, square){
+
+
 		var xstart = square.x;
 		var ystart = square.y;
 		var xstop = square.x;
@@ -172,7 +192,7 @@ function checkSurroundingsForMines(square){
 		if(square.y ==height-1){
 			ystop= square.y-1;
 		}
-		console.log("start: " + xstart + ","+ ystart+ "  -  " + " stop: " + ystop + "," + ystop)
+		//console.log("start: " +( xstart-1 )+ ","+ (ystart-1)+ "  -  " + " stop: " + (xstop+1) + "," + (ystop+1) )
 		for (var i = xstart-1; i <= xstop+1; i++) {
 			for (var j = ystart-1; j <= ystop+1; j++) {
 				if(board[i+'_'+j].isMine == 1){
@@ -181,8 +201,53 @@ function checkSurroundingsForMines(square){
 			};	
 		};
 
-		return counter;
-	}
+	return counter;
+}
+
+function discoverField(clickedSquare){
+		var	number = + board[clickedSquare.x+'_'+clickedSquare.y].surroundingMines;
+
+		if(number == 0){
+			// Propagera, checkSurroundingsForMines
+			var xstart = clickedSquare.x;
+			var ystart = clickedSquare.y;
+			var xstop = clickedSquare.x;
+			var ystop = clickedSquare.y;
+
+			if (clickedSquare.x == 0) {
+				xstart =1;
+			}
+			if(clickedSquare.y ==0){
+				ystart= 1;
+			}
+
+			if (clickedSquare.x == width-1) {
+				xstop =clickedSquare.x-1;
+			}
+			if(clickedSquare.y ==height-1){
+				ystop= clickedSquare.y-1;
+			}
+
+
+			for (var i = xstart-1; i <= xstop+1; i++) {
+				for (var j = ystart-1; j <= ystop+1; j++) {
+
+					if(board[i+"_"+j].checked != '1'){
+						Meteor.call("updateBoard","AggeFan",i,j)
+						board[i+"_"+j].checked = '1';
+						discoverField({x:i,y:j});
+					}
+
+				};
+			};
+
+		}	
+
+		// outputSquare(clickedSquare.x, clickedSquare.y, number);
+		// renderBoard(board);
+
+}
+
 
 if (Meteor.isServer) {
 
@@ -194,18 +259,31 @@ if (Meteor.isServer) {
 			var pos = "";
 
 			var _board = {};
+
 			for(var i = 0; i < width; i++){
 				for(var j = 0; j < height; j++){
 					pos = i + "_" + j;
 					var obj = {};
 					obj['checked'] = 0;
-					obj['isMine'] = Math.round(Math.random()*0.7);
+					obj['isMine'] = Math.round(Math.random()*0.6);
+					obj['surroundingMines']= 0;
 					_board[pos] = obj;
 
 				}
 			}
+
+			for(var i = 0; i < width; i++){
+				for(var j = 0; j < height; j++){
+					_board[i+'_'+j].surroundingMines = checkSurroundingsForMines(_board, {x:i, y:j});
+
+				}
+			}
+
 			var gameID = Game.insert({hostName: hostName, hostName: _hostName,
 				board: _board, width: w, height: h});
+			
+
+
 			console.log("CREATED GAME")
 
 			return gameID;
@@ -218,7 +296,7 @@ if (Meteor.isServer) {
 			var action = {};
 			action[key] = 1
 			console.log(action)
-// 
+ 
 			 Game.update({hostName: _hostName},{$set: action})
 			 // db.games.update({hostName: "AggeFan"},{$set: {"board.3_1" : 1}})
 
@@ -235,9 +313,8 @@ if (Meteor.isServer) {
 	});
 
 	Meteor.startup(function () {
-
 		console.log('server startup')
-		// code to run on server at startup
+
 	});
 
 

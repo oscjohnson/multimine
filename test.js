@@ -17,34 +17,33 @@ if (Meteor.isClient) {
 	var board;
 
 	Meteor.startup(function() {
-    	Session.set('data_loaded', false); 
-  	}); 
+    	curs = Game.find({hostName: "AggeFan"});
 
-  	Meteor.subscribe('game', function(){ 
-  		console.log('subscribe done.')
+    	curs.observe({
+	  		added: function(doc, beforeIndex){
 
-		game =  Game.find({ }).fetch()[0];
-		// rightCanvasSize(game.width, game.height);
-		board = game.board;
-		//renderBoard(board);
+	  			//First Run
+	  			console.log("added")
+	  			// console.log(doc)
+	  			game = doc;
+	  			board = game.board;
+	  			renderBoard(board)
+	  		},
+  			changed: function(oldDoc, newDoc){
+  				board = newDoc.board;
+  				if(oldDoc.version !== newDoc.version){
+  					//console.log(newDoc.version)
+  					renderBoard(newDoc.board)
+  				}
 
+  			}
+  		});
+
+  		
   	});
 
-  	Deps.autorun(function(){
+  	Meteor.subscribe('game');
 
-  		game = Game.find({"hostName": hostName}).fetch()[0];
-  		if(game !== undefined){
-
-  			renderBoard(game.board)
-  			width = game.width
-  			height = game.height
-  			board = game.board;
-
-  		}
-
-
-
-  	})
 
   	Template.game.events({
   		'click #gameCanvas' : function(e){
@@ -52,12 +51,15 @@ if (Meteor.isClient) {
   			var c = getCanvasCoordinates(e);
   			var coord = getBoardXY(c);
 
-  			// checkSurroundingsForMines(board, {x:coord.x, y:coord.y});
-
-  			discoverField(coord);
-
-  			Meteor.call('updateBoard', hostName,coord.x, coord.y);
-  			// fillSquare(boardcoordinates.x, boardcoordinates.y, randomRGB());
+  			//var d = new Date().getTime();
+  			if(	discoverField(coord) ){
+  				//rendervalue++;
+  				renderBoard(board)
+  				Meteor.call('replaceBoard', "AggeFan", board)
+  				Meteor.call('renderUpdate', "AggeFan");
+  			}
+  			
+  			//console.log(new Date().getTime() - d  + " millis")
 
   		}
   		
@@ -65,16 +67,21 @@ if (Meteor.isClient) {
 
 
   	Template.game.rendered = function() {
-
+  		console.log('rendered')
+  		// rightCanvasSize();
 		//renderBoard(board);
 
 	};
 }
 // Functions
 function rightCanvasSize(width, height){
+	console.log('rightCanvasSize')
+	//console.log(width)
+
 	var canvas =document.getElementById('gameCanvas');
 	canvas.width = width*sizepadding;
-	canvas.height = height*sizepadding;
+	canvas.width = height*sizepadding;
+	//console.log(canvas.height = height*sizepadding)
 	//$('#gameCanvas').attr('width', width*sizepadding);
 	//$('#gameCanvas').attr('height', height*sizepadding);
 }
@@ -92,6 +99,7 @@ function printletter(x,y, content){
 
 
 function renderBoard(board){
+	console.log('renderBoard')
 
 	for(pos in board){
 
@@ -203,7 +211,7 @@ function checkSurroundingsForMines(board, square){
 
 	return counter;
 }
-
+var recCounter =0;
 function discoverField(clickedSquare){
 		var	number = + board[clickedSquare.x+'_'+clickedSquare.y].surroundingMines;
 
@@ -221,20 +229,21 @@ function discoverField(clickedSquare){
 				ystart= 1;
 			}
 
-			if (clickedSquare.x == width-1) {
+			if (clickedSquare.x == game.width-1) {
 				xstop =clickedSquare.x-1;
 			}
-			if(clickedSquare.y ==height-1){
+			if(clickedSquare.y == game.height-1){
 				ystop= clickedSquare.y-1;
 			}
 
-
+			//console.log('start ' + (xstart-1) ' , '+ (ystart+1) + " - " )
 			for (var i = xstart-1; i <= xstop+1; i++) {
 				for (var j = ystart-1; j <= ystop+1; j++) {
 
 					if(board[i+"_"+j].checked != '1'){
-						Meteor.call("updateBoard","AggeFan",i,j)
+	
 						board[i+"_"+j].checked = '1';
+						recCounter++;
 						discoverField({x:i,y:j});
 					}
 
@@ -242,9 +251,17 @@ function discoverField(clickedSquare){
 			};
 
 		}	
+	
+	if(recCounter> 0){
 
-		// outputSquare(clickedSquare.x, clickedSquare.y, number);
-		// renderBoard(board);
+		recCounter=0;
+		return false;
+	}else{
+		board[clickedSquare.x+"_"+clickedSquare.y].checked = '1';		
+		
+		recCounter=0;
+		return true;
+	}
 
 }
 
@@ -260,6 +277,7 @@ if (Meteor.isServer) {
 
 			var _board = {};
 
+			//Place RandomMines, init the board
 			for(var i = 0; i < width; i++){
 				for(var j = 0; j < height; j++){
 					pos = i + "_" + j;
@@ -272,6 +290,7 @@ if (Meteor.isServer) {
 				}
 			}
 
+			//calculate all the surrounding mines
 			for(var i = 0; i < width; i++){
 				for(var j = 0; j < height; j++){
 					_board[i+'_'+j].surroundingMines = checkSurroundingsForMines(_board, {x:i, y:j});
@@ -280,9 +299,9 @@ if (Meteor.isServer) {
 			}
 
 			var gameID = Game.insert({hostName: hostName, hostName: _hostName,
-				board: _board, width: w, height: h});
+				board: _board, width: w, height: h, version: 0 });
 			
-
+			
 
 			console.log("CREATED GAME")
 
@@ -291,20 +310,21 @@ if (Meteor.isServer) {
 		updateBoard: function(_hostName, x, y){
 
 			var key = "board." + x + "_" + y + ".checked";
-			// console.log(key)
-			// console.log(typeof key)
 			var action = {};
-			action[key] = 1
-			console.log(action)
+			action[key] = 1;
  
-			 Game.update({hostName: _hostName},{$set: action})
-			 // db.games.update({hostName: "AggeFan"},{$set: {"board.3_1" : 1}})
+			Game.update({hostName: _hostName},{$set: action})
 
-
-		     // console.log("UPDATED "+ _hostName + " with: " + position);
+		},
+		replaceBoard: function(_hostName,_board){
+			console.log(board)
+			Game.update({hostName: _hostName},{$set: {board: _board}});
 		},
 		clearBoard: function(_hostName){
 			Game.remove({hostName: _hostName});
+		},
+		renderUpdate: function(_hostName){
+			 Game.update({hostName: _hostName},{$inc: {version: 1}})
 		}
 	});
 
@@ -321,6 +341,3 @@ if (Meteor.isServer) {
 
 }
 
-function generateMine(){
-	return Math.round(Math.random());
-}

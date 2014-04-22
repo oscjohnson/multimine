@@ -1,5 +1,5 @@
+	/*
 
-/*
 	var canvas = document.getElementById('board');
 	var context = canvas.getContext("2d");
 
@@ -48,7 +48,7 @@
 	// init();
 
 
-	function createBoard(){
+	//function createBoard(){
 
 	// 	for (var i = 0; i < width; i++) {
 	// 		board.push(new Array(height))
@@ -127,20 +127,20 @@
 
 	// }
 
-	// function outputSquare(x,y){
-	// 	var num = checkSurroundingsForMines({x:x, y:y});
+	function outputSquare(x,y){
+		var num = checkSurroundingsForMines({x:x, y:y});
 
-	// 	if(board[x][y] == '1'){
-	// 		fillSquare(x, y, '#DD0000');
-	// 	}
-	// 	else if(num == 0){
-	// 		fillSquare(x, y, '#DDDDDD');	
-	// 	}
-	// 	else{
-	// 		fillSquare(x, y, '#AAAAAA');
-	// 		printletter(x,y, num)
-	// 	}
-	// }
+		if(board[x][y] == '1'){
+			fillSquare(x, y, '#DD0000');
+		}
+		else if(num == 0){
+			fillSquare(x, y, '#DDDDDD');	
+		}
+		else{
+			fillSquare(x, y, '#AAAAAA');
+			printletter(x,y, num)
+		}
+	}
 
 	// function discoverField(clickedSquare){
 	// 	var number =checkSurroundingsForMines(clickedSquare);
@@ -259,4 +259,5 @@
 			}
 		}
 	}
+
 */

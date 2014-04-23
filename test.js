@@ -30,9 +30,8 @@ if (Meteor.isClient) {
 	  			renderBoard(board)
 	  		},
   			changed: function(newDoc, oldDoc){
-  				// Meteor.call('consoleLog','changed')
-  				// console.log("old: " + oldDoc.version + " new: " + newDoc.version)
-  				game = newDoc;
+
+	  			game = newDoc;
 	  			board = game.board;
   				// if(oldDoc.version !== newDoc.version){
   					//console.log(newDoc.version)
@@ -52,10 +51,16 @@ if (Meteor.isClient) {
   		'click #gameCanvas' : function(e){
   			var c = getCanvasCoordinates(e);
   			var coord = getBoardXY(c);
-  			if(	discoverField(coord) ){
-  				// renderBoard(board)
-  				Meteor.call('replaceBoard', "AggeFan", board, game.version)
+
+  			//var d = new Date().getTime();
+  			if(	discover(coord) ){
+				Meteor.call('updateBoard', "AggeFan", coord.x, coord.y)
+
+  			}else{
+  				
+				Meteor.call('replaceBoard', "AggeFan", board)
   			}
+  				// renderBoard(board)
   		}
   		
   	});
@@ -206,59 +211,71 @@ function checkSurroundingsForMines(board, square){
 
 	return counter;
 }
-var recCounter =0;
-function discoverField(clickedSquare){
-		var	number = + board[clickedSquare.x+'_'+clickedSquare.y].surroundingMines;
+function discover(clickedSquare){
 
-		if(number == 0){
-			// Propagera, checkSurroundingsForMines
-			var xstart = clickedSquare.x;
-			var ystart = clickedSquare.y;
-			var xstop = clickedSquare.x;
-			var ystop = clickedSquare.y;
 
-			if (clickedSquare.x == 0) {
-				xstart =1;
-			}
-			if(clickedSquare.y ==0){
-				ystart= 1;
-			}
 
-			if (clickedSquare.x == game.width-1) {
-				xstop =clickedSquare.x-1;
-			}
-			if(clickedSquare.y == game.height-1){
-				ystop= clickedSquare.y-1;
-			}
+	var recCounter =0;
+	var single = true;
 
-			//console.log('start ' + (xstart-1) ' , '+ (ystart+1) + " - " )
-			for (var i = xstart-1; i <= xstop+1; i++) {
-				for (var j = ystart-1; j <= ystop+1; j++) {
 
-					if(board[i+"_"+j].checked != '1'){
-	
-						board[i+"_"+j].checked = '1';
-						recCounter++;
-						discoverField({x:i,y:j});
-					}
+	function discoverField(clickedSquare){
+			var	number = + board[clickedSquare.x+'_'+clickedSquare.y].surroundingMines;
 
+
+			if(number == 0){
+				// Propagera, checkSurroundingsForMines
+				var xstart = clickedSquare.x;
+				var ystart = clickedSquare.y;
+				var xstop = clickedSquare.x;
+				var ystop = clickedSquare.y;
+
+				if (clickedSquare.x == 0) {
+					xstart =1;
+				}
+				if(clickedSquare.y ==0){
+					ystart= 1;
+				}
+
+				if (clickedSquare.x == game.width-1) {
+					xstop =clickedSquare.x-1;
+				}
+				if(clickedSquare.y == game.height-1){
+					ystop= clickedSquare.y-1;
+				}
+
+				//console.log('start ' + (xstart-1) ' , '+ (ystart+1) + " - " )
+				for (var i = xstart-1; i <= xstop+1; i++) {
+					for (var j = ystart-1; j <= ystop+1; j++) {
+
+						if(board[i+"_"+j].checked != '1'){
+							single = false;
+							board[i+"_"+j].checked = '1';
+							recCounter++;
+							discoverField({x:i,y:j});
+						}
+
+					};
 				};
-			};
 
-		}	
-	
-	if(recCounter> 0){
-		recCounter=0;
-		return false;
-	}else{
-		board[clickedSquare.x+"_"+clickedSquare.y].checked = '1';		
-		
-		recCounter=0;
-		return true;
+
+			}
+				
+			if(recCounter > 0){
+
+				recCounter=0;
+				return single;
+			}else{
+				board[clickedSquare.x+"_"+clickedSquare.y].checked = '1';		
+				
+				recCounter=0;
+				return single;
+			}
+
 	}
 
+	return discoverField(clickedSquare);
 }
-
 
 if (Meteor.isServer) {
 
@@ -335,6 +352,7 @@ if (Meteor.isServer) {
 		},
 		consoleLog: function(message){
 			console.log(message)
+
 		}
 	});
 

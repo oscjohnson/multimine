@@ -30,14 +30,20 @@ if (Meteor.isClient) {
 	  			renderBoard(board)
 	  		},
   			changed: function(newDoc, oldDoc){
-
+  				oldboard = board 
 	  			game = newDoc;
 	  			board = game.board;
-  				// if(oldDoc.version !== newDoc.version){
-  					//console.log(newDoc.version)
-  					renderBoard(newDoc.board)
-  				// }
-
+  				
+  				//Stitch
+	  			for (var i = 0; i < game.width; i++) {
+	  				for (var j = 0; j < game.height; j++) {
+	  					if((oldboard[i+"_"+j].checked == 1) && (board[i+"_"+j].checked == 0)){
+	  						board[i+"_"+j].checked = 1;
+	  					}
+		  			};	  			
+		  		};
+  			
+  				renderBoard(board)
   			}
   		});
 
@@ -53,14 +59,17 @@ if (Meteor.isClient) {
   			var coord = getBoardXY(c);
 
   			//var d = new Date().getTime();
-  			if(	discover(coord) ){
-				Meteor.call('updateBoard', "AggeFan", coord.x, coord.y)
+  		// 	if(	discover(coord) ){
+				// Meteor.call('updateBoard', "AggeFan", coord.x, coord.y)
 
-  			}else{
+  		// 	}else{
   				
-				Meteor.call('replaceBoard', "AggeFan", board)
-  			}
-  				// renderBoard(board)
+				// Meteor.call('replaceBoard', "AggeFan", board, game.version)
+  		// 	}
+  			var o =discover(coord);
+  			renderBoard(board)
+  			Meteor.call('updateBoard',"AggeFan", o);
+
   		}
   		
   	});
@@ -217,7 +226,7 @@ function discover(clickedSquare){
 
 	var recCounter =0;
 	var single = true;
-
+	var queryObject = {};//'{hostName:"AggeFan"}, {$set: {'
 
 	function discoverField(clickedSquare){
 			var	number = + board[clickedSquare.x+'_'+clickedSquare.y].surroundingMines;
@@ -251,6 +260,7 @@ function discover(clickedSquare){
 						if(board[i+"_"+j].checked != '1'){
 							single = false;
 							board[i+"_"+j].checked = '1';
+							addToQuery(i,j);
 							recCounter++;
 							discoverField({x:i,y:j});
 						}
@@ -262,18 +272,28 @@ function discover(clickedSquare){
 			}
 				
 			if(recCounter > 0){
-
+				//recursive
 				recCounter=0;
-				return single;
+				//return single;
+				return queryObject;
 			}else{
 				board[clickedSquare.x+"_"+clickedSquare.y].checked = '1';		
-				
+				//single
+				addToQuery(clickedSquare.x,clickedSquare.y)
+				return queryObject; 
 				recCounter=0;
-				return single;
+				//single;
 			}
 
 	}
 
+	function addToQuery(x, y){
+
+		var key = "board." + x + "_" + y + ".checked";
+		queryObject[key] = 1;
+	//console.log(queryObject)
+
+	}
 	return discoverField(clickedSquare);
 }
 
@@ -318,34 +338,17 @@ if (Meteor.isServer) {
 
 			return gameID;
 		},
-		updateBoard: function(_hostName, x, y){
+		// updateBoard: function(_hostName, x, y){
 
-			var key = "board." + x + "_" + y + ".checked";
-			var action = {};
-			action[key] = 1;
+		// 	var key = "board." + x + "_" + y + ".checked";
+		// 	var action = {};
+		// 	action[key] = 1;
  
-			Game.update({hostName: _hostName},{$set: action})
+		// 	Game.update({hostName: _hostName},{$set: action})
 
-		},
-		replaceBoard: function(_hostName, _board, _version){
-			var game = Game.find({hostName: _hostName}).fetch()[0];
-			console.log("server: " + game.version, "client: " + _version);
-
-			if(game.version > _version){
-				for (var i = 0; i < game.width; i++) {
-					for (var j = 0; j < game.height; j++) {
-						if((game.board[i+"_"+j].checked == '1') && (_board[i+"_"+j].checked != '1') ){
-							_board[i+"_"+j].checked = '1';
-						}
-					};
-				};
-			}
-			Game.update({hostName: _hostName},
-				{
-					$set: {board: _board},
-					$inc: {version: 1}
-				});
-			// Game.update({hostName: _hostName},{$inc: {version: 1}})
+		// },
+		updateBoard : function(_hostName, queryObject){
+			Game.update({hostName: _hostName},{$set: queryObject})
 		},
 		clearBoard: function(_hostName){
 			Game.remove({hostName: _hostName});
@@ -353,7 +356,7 @@ if (Meteor.isServer) {
 		consoleLog: function(message){
 			console.log(message)
 
-		}
+		} 
 	});
 
 	Meteor.publish('game', function(args){

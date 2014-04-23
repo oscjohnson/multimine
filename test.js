@@ -29,12 +29,15 @@ if (Meteor.isClient) {
 	  			board = game.board;
 	  			renderBoard(board)
 	  		},
-  			changed: function(oldDoc, newDoc){
-  				board = newDoc.board;
-  				if(oldDoc.version !== newDoc.version){
+  			changed: function(newDoc, oldDoc){
+  				// Meteor.call('consoleLog','changed')
+  				// console.log("old: " + oldDoc.version + " new: " + newDoc.version)
+  				game = newDoc;
+	  			board = game.board;
+  				// if(oldDoc.version !== newDoc.version){
   					//console.log(newDoc.version)
   					renderBoard(newDoc.board)
-  				}
+  				// }
 
   			}
   		});
@@ -47,20 +50,12 @@ if (Meteor.isClient) {
 
   	Template.game.events({
   		'click #gameCanvas' : function(e){
-
   			var c = getCanvasCoordinates(e);
   			var coord = getBoardXY(c);
-
-  			//var d = new Date().getTime();
   			if(	discoverField(coord) ){
-  				//rendervalue++;
-  				renderBoard(board)
-  				Meteor.call('replaceBoard', "AggeFan", board)
-  				Meteor.call('renderUpdate', "AggeFan");
+  				// renderBoard(board)
+  				Meteor.call('replaceBoard', "AggeFan", board, game.version)
   			}
-  			
-  			//console.log(new Date().getTime() - d  + " millis")
-
   		}
   		
   	});
@@ -109,9 +104,9 @@ function renderBoard(board){
 		var y = +xy[1]
 	
 
-		if(board[pos].checked ==1){
+		if(board[pos].checked == 1){
 
-			if(board[pos].isMine ==1){
+			if(board[pos].isMine == 1){
 				fillSquare(x, y, "#d00");
 			}else{
 				if(board[pos].surroundingMines == 0){
@@ -253,7 +248,6 @@ function discoverField(clickedSquare){
 		}	
 	
 	if(recCounter> 0){
-
 		recCounter=0;
 		return false;
 	}else{
@@ -316,15 +310,31 @@ if (Meteor.isServer) {
 			Game.update({hostName: _hostName},{$set: action})
 
 		},
-		replaceBoard: function(_hostName,_board){
-			console.log(board)
-			Game.update({hostName: _hostName},{$set: {board: _board}});
+		replaceBoard: function(_hostName, _board, _version){
+			var game = Game.find({hostName: _hostName}).fetch()[0];
+			console.log("server: " + game.version, "client: " + _version);
+
+			if(game.version > _version){
+				for (var i = 0; i < game.width; i++) {
+					for (var j = 0; j < game.height; j++) {
+						if((game.board[i+"_"+j].checked == '1') && (_board[i+"_"+j].checked != '1') ){
+							_board[i+"_"+j].checked = '1';
+						}
+					};
+				};
+			}
+			Game.update({hostName: _hostName},
+				{
+					$set: {board: _board},
+					$inc: {version: 1}
+				});
+			// Game.update({hostName: _hostName},{$inc: {version: 1}})
 		},
 		clearBoard: function(_hostName){
 			Game.remove({hostName: _hostName});
 		},
-		renderUpdate: function(_hostName){
-			 Game.update({hostName: _hostName},{$inc: {version: 1}})
+		consoleLog: function(message){
+			console.log(message)
 		}
 	});
 

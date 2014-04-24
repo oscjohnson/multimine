@@ -8,7 +8,7 @@ var sizepadding = size + padding;
 var width ;
 var height ;
 var game;
-var dev = true;
+var dev = false;
 var hostName ="AggeFan"
 // const ROWS = 4;
 // const COLUMNS = 4;
@@ -74,7 +74,24 @@ if (Meteor.isClient) {
   		},
   		'contextmenu #gameCanvas' : function(e){
   			e.preventDefault();
-  			Meteor.call();
+
+  			var c = getBoardXY(getCanvasCoordinates(e));
+
+  			if(board[c.x+'_'+c.y].checked != '1'){
+  				console.log('not checked')
+	  			if(board[c.x +'_'+ c.y].isMine == 1){
+	  				//uppdatera
+	  				board[c.x+'_'+c.y].checked =2;
+	  				renderBoard(board)
+  					Meteor.call('rightClick', "AggeFan", c);
+
+	  			}else{
+	  				//failflash
+	  				failanimation(c);
+	  			}
+  			}else{
+  				// console.log('already checked')
+  			}
   		}
   		, 
   		'keydown': function(e){
@@ -101,15 +118,32 @@ if (Meteor.isClient) {
 }
 // Functions
 function rightCanvasSize(){
-	console.log('rightCanvasSize')
-	//console.log(width)
 
 	var canvas =document.getElementById('gameCanvas');
 	canvas.width = game.width*sizepadding;
 	canvas.height = game.height*sizepadding;
-	//console.log(canvas.height = height*sizepadding)
-	//$('#gameCanvas').attr('width', width*sizepadding);
-	//$('#gameCanvas').attr('height', height*sizepadding);
+
+}
+
+function failanimation(c){
+	var globalID = requestAnimationFrame(repeatOften);
+
+	var canvas = document.getElementById('gameCanvas');
+	var context = canvas.getContext('2d');
+	var r=0;
+
+	function repeatOften() {
+		r+=30;
+		rgb = "rgb(" +r+ ", "+ r +", "+ r +")";
+		context.fillStyle = rgb;
+		context.fillRect(c.x*sizepadding, c.y*sizepadding, size, size);
+	  	globalID = requestAnimationFrame(repeatOften);
+	  	if(r> 254){
+	  		cancelAnimationFrame(globalID);
+	  		renderSquare(c.x,c.y);
+	  	}
+	}
+
 }
 
 function printletter(x,y, content){
@@ -129,11 +163,21 @@ function renderBoard(board){
 
 	for(pos in board){
 
-		var color;
 		var xy = pos.split("_");
 		var x = +xy[0]
 		var y = +xy[1]
-	
+		renderSquare(x,y);
+
+	}
+}
+
+function renderSquare(x,y){
+		var pos = x+"_"+y;
+
+
+		//renderBorder(x,y)
+		
+
 
 		if(board[pos].checked == 1){
 
@@ -149,7 +193,7 @@ function renderBoard(board){
 			}
 
 		}else if(board[pos].checked == 2){
-
+			fillSquare(x, y, "#0d0");
 		}else{
 			// fillSquare(x, y, "#aaa");
 			if(dev){
@@ -164,10 +208,15 @@ function renderBoard(board){
 			}
 
 		}
-
-	}
 }
 
+function renderBorder(x,y){
+	var gameCanvas = $("#gameCanvas");
+	var context = gameCanvas[0].getContext('2d');
+	context.fillStyle = "rgb(155,155,155)";
+	context.fillRect(size + (x-1)*sizepadding, size + (y-1)*sizepadding, padding, sizepadding);		
+	context.fillRect(size+ (x-1)*sizepadding, size + (y-1)*sizepadding, sizepadding, padding);
+}
 
 function getCanvasCoordinates(e){
 	var x;
@@ -187,6 +236,7 @@ function getCanvasCoordinates(e){
 
 	return {x:x,y:y};
 }
+
 
 function getBoardXY(coordinates){
 	var xBoard  = Math.ceil(coordinates.x / sizepadding)-1;
@@ -321,7 +371,6 @@ function discover(clickedSquare){
 
 		var key = "board." + x + "_" + y + ".checked";
 		queryObject[key] = 1;
-	//console.log(queryObject)
 
 	}
 	return discoverField(clickedSquare);
@@ -377,6 +426,15 @@ if (Meteor.isServer) {
 		// 	Game.update({hostName: _hostName},{$set: action})
 
 		// },
+		rightClick: function(_hostName, coord){
+			x = coord.x;
+			y = coord.y;
+			var key = "board." + x + "_" + y + ".checked";
+			var action = {};
+			action[key] = 2;
+ 
+			Game.update({hostName: _hostName},{$set: action})
+		},
 		updateBoard : function(_hostName, queryObject){
 			Game.update({hostName: _hostName},{$set: queryObject})
 		},

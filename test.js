@@ -8,7 +8,7 @@ var sizepadding = size + padding;
 var width ;
 var height ;
 var game;
-
+var dev = true;
 var hostName ="AggeFan"
 // const ROWS = 4;
 // const COLUMNS = 4;
@@ -27,6 +27,7 @@ if (Meteor.isClient) {
 	  			// console.log(doc)
 	  			game = doc;
 	  			board = game.board;
+	  			rightCanvasSize();
 	  			renderBoard(board)
 	  		},
   			changed: function(newDoc, oldDoc){
@@ -70,6 +71,14 @@ if (Meteor.isClient) {
   			renderBoard(board)
   			Meteor.call('updateBoard',"AggeFan", o);
 
+  		},
+  		'contextmenu #gameCanvas' : function(e){
+  			e.preventDefault();
+  			Meteor.call();
+  		}
+  		, 
+  		'keydown': function(e){
+
   		}
   		
   	});
@@ -80,16 +89,24 @@ if (Meteor.isClient) {
   		// rightCanvasSize();
 		//renderBoard(board);
 
+		$(window).on('keydown', function(e){
+			if(e.which == 83){
+				dev= !dev;
+				renderBoard(board);
+			}
+		});
+
+
 	};
 }
 // Functions
-function rightCanvasSize(width, height){
+function rightCanvasSize(){
 	console.log('rightCanvasSize')
 	//console.log(width)
 
 	var canvas =document.getElementById('gameCanvas');
-	canvas.width = width*sizepadding;
-	canvas.width = height*sizepadding;
+	canvas.width = game.width*sizepadding;
+	canvas.height = game.height*sizepadding;
 	//console.log(canvas.height = height*sizepadding)
 	//$('#gameCanvas').attr('width', width*sizepadding);
 	//$('#gameCanvas').attr('height', height*sizepadding);
@@ -108,7 +125,7 @@ function printletter(x,y, content){
 
 
 function renderBoard(board){
-	console.log('renderBoard')
+	//console.log('renderBoard')
 
 	for(pos in board){
 
@@ -131,8 +148,21 @@ function renderBoard(board){
 				
 			}
 
+		}else if(board[pos].checked == 2){
+
 		}else{
-			fillSquare(x, y, "#aaa");
+			// fillSquare(x, y, "#aaa");
+			if(dev){
+
+				if(board[pos].isMine == 1){
+					fillSquare(x, y, "#000");
+				}else{
+					fillSquare(x, y, "#aaa");
+				}
+			}else{
+				fillSquare(x, y, "#aaa");
+			}
+
 		}
 
 	}

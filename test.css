@@ -10,3 +10,23 @@
 	padding: 10px;
 }
 
+.user{
+	padding: 15px;
+	background: #eee;
+	margin-bottom: 4px;
+	margin-right: 4px;
+	width: 270px;
+	float:left;
+}
+
+.clearfix{
+	clear:both;
+}
+.info-item{
+	display: block;
+}
+
+.currentUser{
+	background: #4D94FF !important;
+
+}

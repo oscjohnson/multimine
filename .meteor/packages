@@ -5,3 +5,6 @@
 
 standard-app-packages
 insecure
+accounts-base
+accounts-password
+accounts-ui

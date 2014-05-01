@@ -1,12 +1,44 @@
 <body>
 	<script src="main.js"></script>
 
-  	{{> game}}
 
+  	{{> game}}
+	{{> loginButtons}}
+
+	{{> scoreboard}}
 </body>
 
 <template name="game">
 	<canvas id="gameCanvas" width="1000" height="1000"></canvas>
+	<button id="restartBoard">restart</button>
 
+
+</template>
+
+<template name="scoreboard">
+	<h1>score</h1>
+	{{#each user}}
+		<div class="user {{currentUser}}">
+			{{> name}}
+			<div class="info-item">Score: {{> score}}</div>
+			<div class="info-item">Squares revealed: {{> revealed}}.</div>
+			
+		</div>
+
+
+	{{/each}}
+	<div class="clearfix"></div>
+</template>
+
+<template name="name">
+	<h3>{{name}}</h3>
+</template>
+
+<template name="score">
+	{{score}}
+</template>
+
+<template name="revealed">
+	{{revealed}}
 </template>
 

@@ -19,6 +19,18 @@
 	float:left;
 }
 
+.canvas-wrapper{
+	position: relative;
+}
+#overlayCanvas{
+	z-index: 1;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+}
+#gameCanvas{
+	z-index: -1;
+}
 .clearfix{
 	clear:both;
 }
@@ -27,6 +39,6 @@
 }
 
 .currentUser{
-	background: #4D94FF !important;
+	background: #BDD7FF !important;
 
 }

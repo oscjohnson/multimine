@@ -34,6 +34,7 @@ if (Meteor.isClient) {
 	  			board = game.board;
 	  			rightCanvasSize();
 	  			renderBoard(board)
+	  			paintOverlay()
 	  		},
   			changed: function(newDoc, oldDoc){
   				oldboard = board 
@@ -58,7 +59,7 @@ if (Meteor.isClient) {
 
 
   	Template.game.events({
-  		'click #gameCanvas' : function(e){
+  		'click #overlayCanvas' : function(e){
   			var c = getCanvasCoordinates(e);
   			var coord = getBoardXY(c);
   			//Om det behövs uppdateras gör det.
@@ -72,7 +73,7 @@ if (Meteor.isClient) {
   			}
 
   		},
-  		'contextmenu #gameCanvas' : function(e){
+  		'contextmenu #overlayCanvas' : function(e){
   			e.preventDefault();
 
   			var c = getBoardXY(getCanvasCoordinates(e));
@@ -114,7 +115,7 @@ if (Meteor.isClient) {
 
 		$(window).on('keydown', function(e){
 			if(e.which == 83){
-				dev= !dev;
+				// dev= !dev;
 				renderBoard(board);
 			}
 		});
@@ -159,6 +160,10 @@ if (Meteor.isClient) {
 function rightCanvasSize(){
 
 	var canvas =document.getElementById('gameCanvas');
+	canvas.width = game.width*sizepadding;
+	canvas.height = game.height*sizepadding;
+
+	var canvas =document.getElementById('overlayCanvas');
 	canvas.width = game.width*sizepadding;
 	canvas.height = game.height*sizepadding;
 
@@ -247,6 +252,15 @@ function renderSquare(x,y){
 		}
 }
 
+function paintOverlay(){
+		var x = 2.5, y= 2.5, color ="#FF0";
+
+		var gameCanvas = $("#overlayCanvas");
+		var context = gameCanvas[0].getContext('2d');
+		context.fillStyle = color;
+		context.fillRect(x*sizepadding, y*sizepadding, size, size);
+}
+
 function renderBorder(x,y){
 	var gameCanvas = $("#gameCanvas");
 	var context = gameCanvas[0].getContext('2d');
@@ -256,9 +270,10 @@ function renderBorder(x,y){
 }
 
 function getCanvasCoordinates(e){
+	console.log('getCanvasCoordinates')
 	var x;
 	var y;
-	var gCanvasElement = document.getElementById('gameCanvas');
+	var gCanvasElement = document.getElementById('overlayCanvas');
 
 	if (e.pageX || e.pageY) { 
 	  x = e.pageX;
@@ -420,10 +435,14 @@ function discover(clickedSquare){
 }
 
 if (Meteor.isServer) {
-
+	Accounts.onLogin(function(){
+		console.log('logged in')
+		console.log(this.userId)
+		Meteor.users.update({_id: Meteor.user()._id}, {$set:{"profile.online":true}})
+	})
 
 	Accounts.onCreateUser(function(options, user) {
-	  user.profile = options.profile ? options.profile : {};
+	  user.profile = options.profile ? options.profile : {online: false};
 	  return user;
 	});
 

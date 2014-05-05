@@ -6,17 +6,25 @@ Game = new Meteor.Collection("games");
 var size = 30;
 var padding = 3;
 var sizepadding = size + padding;
-
+var apm=0;
 var width ;
 var height ;
 var game;
 var dev = false;
 var hostName ="AggeFan"
-// const ROWS = 4;
-// const COLUMNS = 4;
 
 if (Meteor.isClient) {
 	var board;
+
+	Meteor.logout(function(){
+		console.log('logouts')
+	});
+
+	Deps.autorun(function(){
+		if(!Meteor.userId()){
+
+		}
+	})
 
   	Meteor.subscribe('game');
   	Meteor.subscribe('allUsers');
@@ -34,7 +42,7 @@ if (Meteor.isClient) {
 	  			board = game.board;
 	  			rightCanvasSize();
 	  			renderBoard(board)
-	  			paintOverlay()
+
 	  		},
   			changed: function(newDoc, oldDoc){
   				oldboard = board 
@@ -54,12 +62,20 @@ if (Meteor.isClient) {
   			}
   		});
 
-  		
+
+  		curs2.observe({
+  			changed: function(newdoc, olddoc){
+
+  			}
+			//Meteor.users.update({_id: data.user._id}, {$set:{"profile.online":true}})
+  		})
   	});
 
 
   	Template.game.events({
   		'click #overlayCanvas' : function(e){
+
+
   			var c = getCanvasCoordinates(e);
   			var coord = getBoardXY(c);
   			//Om det behövs uppdateras gör det.
@@ -67,11 +83,15 @@ if (Meteor.isClient) {
 	  			var o =discover(coord);
 
 	  			renderBoard(board)
-	  			
+	  			if(board[coord.x+'_'+coord.y].isMine == '1'){
+	  				printPoints(c, -1)
+	  			}else{
+	  				printPoints(c, 1)
+	  			}
 	  			Meteor.call('updateBoard',"AggeFan", coord, o);
   				
   			}
-
+  			apm++;
   		},
   		'contextmenu #overlayCanvas' : function(e){
   			e.preventDefault();
@@ -96,13 +116,15 @@ if (Meteor.isClient) {
   			}else{
   				// console.log('already checked')
   			}
+  			apm++;
   		}, 
   		'keydown': function(e){
-
+  				console.log('this')
+  			
   		},
   		'click #restartBoard' : function(){
 			Meteor.call('clearBoard',"AggeFan");
-			Meteor.call('createBoard','my fun game', 'AggeFan', 20,15);
+			Meteor.call('createBoard','my fun game', 'AggeFan', 30,30);
 			Meteor.call('removePoints');
   		}
   	});
@@ -125,7 +147,7 @@ if (Meteor.isClient) {
 	Template.scoreboard.user = function(){
 		if(Meteor.users.find().fetch()[0] !== undefined){
 
-			return Meteor.users.find();
+			return Meteor.users.find({}, {sort: {"profile.score": -1 }});
 
 		}
 	}
@@ -140,7 +162,9 @@ if (Meteor.isClient) {
 
 	Template.name.name = function(){
 		if(Meteor.users.find().fetch()[0] !== undefined){
-			return Meteor.users.find( this._id  ).fetch()[0].emails[0].address 
+			var email= Meteor.users.find( this._id  ).fetch()[0].emails[0].address;
+			email =email.split('@')
+			return email[0];
 		}
 	}
 
@@ -189,6 +213,66 @@ function failanimation(c){
 	}
 
 }
+
+function printPoints(c, score){
+	c.y -=2;
+	var globalID = requestAnimationFrame(repeatOften);
+
+	var canvas = document.getElementById('overlayCanvas');
+	var context = canvas.getContext('2d');
+	var r=250;
+	var size =30;
+	var padding = 3;
+	var sizepadding = size + padding;
+	var speed =r;
+	var fontsize = Math.round(1.5*size)+ "px";
+	var r,g,b;
+
+	var offSetX = 0;
+	var offSetY = -30;
+	if(score > 0){
+		r = 255;
+		g = 190;
+		b = 0;
+		score= "+" + score;
+	}else{
+		r = 255;
+		g = 0;
+		b = 0;
+
+	}
+
+	function repeatOften() {
+		r-=3;
+		speed -=8;
+		greycolor = 0;
+		context.clearRect(0, 0, canvas.width, canvas.height);
+
+		
+		rgb = "rgba(" + r + ", "+ g +", "+ b +", "+  (0.004*r).toPrecision(2)  +")";
+		
+
+
+		context.fillStyle = rgb;
+
+
+		context.font = "bold "+ fontsize +" Arial";
+
+		context.strokeStyle = "rgba(" + 255 + ", "+ 255 +", "+ 255 +", "+  (0.004*r).toPrecision(2)  +")";
+		context.lineWidth = 3;
+      	context.strokeText(score,c.x + offSetX, c.y + offSetY);
+
+		context.fillText(score, c.x + offSetX, c.y + offSetY);
+		
+		globalID = requestAnimationFrame(repeatOften);
+	  	if(r< 1){
+			context.clearRect(0, 0, canvas.width, canvas.height);
+	  		cancelAnimationFrame(globalID);
+	  	}
+	}
+
+}
+
 
 function printletter(x,y, content){
 	var gameCanvas = $("#gameCanvas");
@@ -435,11 +519,12 @@ function discover(clickedSquare){
 }
 
 if (Meteor.isServer) {
-	Accounts.onLogin(function(){
+	Accounts.onLogin(function(data){
 		console.log('logged in')
-		console.log(this.userId)
-		Meteor.users.update({_id: Meteor.user()._id}, {$set:{"profile.online":true}})
+		console.log();
+		Meteor.users.update({_id: data.user._id}, {$set:{"profile.online":true}})
 	})
+
 
 	Accounts.onCreateUser(function(options, user) {
 	  user.profile = options.profile ? options.profile : {online: false};
@@ -452,7 +537,7 @@ if (Meteor.isServer) {
 	});
 
 	Meteor.publish('allUsers', function(args){
-		return Meteor.users.find({}, {fields:{'emails':1, 'profile.score': 1, 'profile.revealed': 1}});
+		return Meteor.users.find({"profile.online": true}, {fields:{'emails':1, 'profile.score': 1, 'profile.revealed': 1}});
 	});
 	//Meteor.publish('userData', function(){return Meteor.users.find()	});
 

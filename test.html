@@ -19,22 +19,30 @@
 </template>
 
 <template name="scoreboard">
-	<h1>score</h1>
-	{{#each user}}
-		<div class="user {{currentUser}}">
-			{{> name}}
-			<div class="info-item">Score: {{> score}}</div>
-			<div class="info-item">Squares revealed: {{> revealed}}.</div>
-			
-		</div>
+	<div id="scoreboard">
+		
+		<h1>scoreboard</h1>
+			<div class="header">
+				<div class="name">Name</div>
+				<div class="score">Score</div>
+				<div class="revealed">(Squares revealed)</div>
+			</div>
+		{{#each user}}
+			<div class="user {{currentUser}}">
+				<div class="name" >{{> name}}</div>
+				<div class="info-item"> {{> score}}</div>
+				<div class="info-item">( {{> revealed}})</div>
+				
+			</div>
 
 
-	{{/each}}
-	<div class="clearfix"></div>
+		{{/each}}
+		<div class="clearfix"></div>
+	</div>
 </template>
 
 <template name="name">
-	<h3>{{name}}</h3>
+	{{name}}
 </template>
 
 <template name="score">

@@ -18,6 +18,13 @@
 	width: 270px;
 	float:left;
 }
+.user .name{
+	font-size: 19px;
+	font-weight: bold;
+}
+.user div{
+	display: inline-block;
+}
 
 .canvas-wrapper{
 	position: relative;
@@ -30,6 +37,36 @@
 }
 #gameCanvas{
 	z-index: -1;
+}
+
+#scoreboard{
+	position: fixed;
+	top: 0px;
+	right: 0px;
+	width: 300px;
+}
+
+#scoreboard .header{
+
+		padding: 15px;
+	background: #919191;
+	color: rgb(247, 247, 247);
+	margin-bottom: 4px;
+	margin-right: 4px;
+	width: 270px;
+	float:left;
+}
+
+#scoreboard .header div{
+	display: inline-block;	
+}
+#scoreboard .header .name{
+	font-size: 19px;
+	font-weight: bold;
+}
+
+#scoreboard h1{
+	text-align: center;
 }
 .clearfix{
 	clear:both;

@@ -16,21 +16,8 @@ var hostName ="AggeFan"
 if (Meteor.isClient) {
 	var board;
 
-	Meteor.logout(function(){
-		console.log('logouts')
-	});
-
-	Deps.autorun(function(){
-		if(!Meteor.userId()){
-
-		}
-	})
-
   	Meteor.subscribe('game');
   	Meteor.subscribe('allUsers');
-
-	Deps.autorun(function(){if(Meteor.user()){}});
-
   	
 	Meteor.startup(function() {
     	curs = Game.find({hostName: "AggeFan"});
@@ -61,14 +48,6 @@ if (Meteor.isClient) {
   				renderBoard(board)
   			}
   		});
-
-
-  		curs2.observe({
-  			changed: function(newdoc, olddoc){
-
-  			}
-			//Meteor.users.update({_id: data.user._id}, {$set:{"profile.online":true}})
-  		})
   	});
 
 
@@ -591,7 +570,9 @@ if (Meteor.isServer) {
 			var find = Game.find({hostName: _hostName}).fetch()
 			var isMine =find[0].board[x+'_'+y].isMine;
 
-			if(isMine ==1){
+			console.log(isMine)
+
+			if(isMine == 1){
 			//Om hittat mina RATT
 			var key = "board." + x + "_" + y + ".checked";
 			var action = {};

@@ -13,16 +13,26 @@ var game;
 var dev = false;
 var hostName ="AggeFan"
 
+var userid;
+
+var startTime;
+
+var score = {
+	rightwin: 10,
+	rightfail: -5,
+	leftwin: 1,
+	leftfail: -10,
+	reveal: 5
+}
+console.log(score.rightwin)
 if (Meteor.isClient) {
 	var board;
 
-	Meteor.logout(function(){
-		console.log('logouts')
-	});
-
 	Deps.autorun(function(){
 		if(!Meteor.userId()){
-
+			Meteor.call('logoutUser', userid);
+		}else{
+			userid = Meteor.userId();
 		}
 	})
 
@@ -62,13 +72,13 @@ if (Meteor.isClient) {
   			}
   		});
 
-
+    	/*
   		curs2.observe({
   			changed: function(newdoc, olddoc){
 
   			}
 			//Meteor.users.update({_id: data.user._id}, {$set:{"profile.online":true}})
-  		})
+  		})*/
   	});
 
 
@@ -84,9 +94,16 @@ if (Meteor.isClient) {
 
 	  			renderBoard(board)
 	  			if(board[coord.x+'_'+coord.y].isMine == '1'){
-	  				printPoints(c, -1)
+	  				//mine fail
+	  				printPoints(c, -10)
 	  			}else{
-	  				printPoints(c, 1)
+	  				//mine win
+
+	  				if(Object.size(o) > 5){
+	  					printPoints(c, score.reveal);
+	  				}else{
+	  					printPoints(c, score.leftwin);
+	  				}
 	  			}
 	  			Meteor.call('updateBoard',"AggeFan", coord, o);
   				
@@ -95,20 +112,20 @@ if (Meteor.isClient) {
   		},
   		'contextmenu #overlayCanvas' : function(e){
   			e.preventDefault();
-
+  			var coord =getCanvasCoordinates(e);
   			var c = getBoardXY(getCanvasCoordinates(e));
 
   			if(board[c.x+'_'+c.y].checked == '0'){
 
 	  			if(board[c.x +'_'+ c.y].isMine == 1){
-	  				//uppdatera
+	  				//desarmerat mina
 	  				board[c.x+'_'+c.y].checked =2;
 	  				renderBoard(board)
-
+	  				printPoints(coord, score.rightwin)
 	  			}else{
 	  				//failflash
-
 	  				failanimation(c);
+	  				printPoints(coord, score.rightfail)
 	  			}
   				Meteor.call('rightClick', "AggeFan", c);
   			
@@ -117,27 +134,32 @@ if (Meteor.isClient) {
   				// console.log('already checked')
   			}
   			apm++;
-  		}, 
-  		'keydown': function(e){
-  				console.log('this')
-  			
   		},
   		'click #restartBoard' : function(){
 			Meteor.call('clearBoard',"AggeFan");
 			Meteor.call('createBoard','my fun game', 'AggeFan', 30,30);
 			Meteor.call('removePoints');
+  		},
+  		'click #startBoard': function(){
+  			if($('#startBoard').text() == "START"){
+	  			$('#startBoard').text("STOP");
+	  			startTime = new Date().getTime();
+  			}else{
+  				var diff = new Date().getTime() -startTime;
+	  			console.log(diff);
+	  			console.log('apm: ' + apm/(diff/(60*1000) ) )
+	  			$('#startBoard').text("START");
+	  			startTime =0;
+  			}
   		}
   	});
 
 
   	Template.game.rendered = function() {
-  		console.log('rendered')
-  		// rightCanvasSize();
-		//renderBoard(board);
 
 		$(window).on('keydown', function(e){
 			if(e.which == 83){
-				// dev= !dev;
+				//dev= !dev;
 				renderBoard(board);
 			}
 		});
@@ -215,7 +237,7 @@ function failanimation(c){
 }
 
 function printPoints(c, score){
-	c.y -=2;
+
 	var globalID = requestAnimationFrame(repeatOften);
 
 	var canvas = document.getElementById('overlayCanvas');
@@ -239,7 +261,6 @@ function printPoints(c, score){
 		r = 255;
 		g = 0;
 		b = 0;
-
 	}
 
 	function repeatOften() {
@@ -274,12 +295,12 @@ function printPoints(c, score){
 }
 
 
-function printletter(x,y, content){
+function printletter(x,y, content,color,textcolor){
 	var gameCanvas = $("#gameCanvas");
 	var context = gameCanvas[0].getContext('2d');
 
-	fillSquare(x,y, "#ddd")
-	context.fillStyle = "#000000";
+	fillSquare(x,y, color)
+	context.fillStyle = textcolor;
 	var fontsize = Math.round(0.6*size)+ "px";
 	context.font = "bold "+ fontsize +" Arial";
 	context.fillText(content, Math.round(0.33*size) + x*sizepadding, Math.round(0.73*size) + y*sizepadding);
@@ -302,35 +323,43 @@ function renderBoard(board){
 function renderSquare(x,y){
 		var pos = x+"_"+y;
 
+		var green = "#4a4";
+		var red ="#a44";
 
-		//renderBorder(x,y)
+
+		var zeroground = "#eee";
+		var undiscovered = "#555";
+		var numbercolor = "#eee"
+		var textcolor = "#000"
+
+		renderBorder(x,y, "#000")
 		
 		if(board[pos].checked == 1){
 
 			if(board[pos].isMine == 1){
-				fillSquare(x, y, "#d00");
+				fillSquare(x, y, red);
 			}else{
 				if(board[pos].surroundingMines == 0){
-					fillSquare(x,y, "ddd");
+					fillSquare(x,y, zeroground);
 				}else{
-					printletter(x, y, board[pos].surroundingMines);
+					printletter(x, y, board[pos].surroundingMines, numbercolor, textcolor);
 				}
 				
 			}
 
 		}else if(board[pos].checked == 2){
-			fillSquare(x, y, "#0d0");
+			fillSquare(x, y, green);
 		}else{
-			// fillSquare(x, y, "#aaa");
+			 // fillSquare(x, y, "#aaa");
 			if(dev){
 
 				if(board[pos].isMine == 1){
 					fillSquare(x, y, "#000");
 				}else{
-					fillSquare(x, y, "#aaa");
+					fillSquare(x, y, undiscovered);
 				}
 			}else{
-				fillSquare(x, y, "#aaa");
+				fillSquare(x, y, undiscovered);
 			}
 
 		}
@@ -345,16 +374,15 @@ function paintOverlay(){
 		context.fillRect(x*sizepadding, y*sizepadding, size, size);
 }
 
-function renderBorder(x,y){
+function renderBorder(x,y,color){
 	var gameCanvas = $("#gameCanvas");
 	var context = gameCanvas[0].getContext('2d');
-	context.fillStyle = "rgb(155,155,155)";
+	context.fillStyle = color;
 	context.fillRect(size + (x-1)*sizepadding, size + (y-1)*sizepadding, padding, sizepadding);		
 	context.fillRect(size+ (x-1)*sizepadding, size + (y-1)*sizepadding, sizepadding, padding);
 }
 
 function getCanvasCoordinates(e){
-	console.log('getCanvasCoordinates')
 	var x;
 	var y;
 	var gCanvasElement = document.getElementById('overlayCanvas');
@@ -494,9 +522,8 @@ function discover(clickedSquare){
 			}
 				
 			if(recCounter > 0){
-				//recursive
+
 				recCounter=0;
-				//return single;
 				return queryObject;
 			}else{
 				board[clickedSquare.x+"_"+clickedSquare.y].checked = '1';		
@@ -504,7 +531,7 @@ function discover(clickedSquare){
 				addToQuery(clickedSquare.x,clickedSquare.y)
 				return queryObject; 
 				recCounter=0;
-				//single;
+
 			}
 
 	}
@@ -520,8 +547,6 @@ function discover(clickedSquare){
 
 if (Meteor.isServer) {
 	Accounts.onLogin(function(data){
-		console.log('logged in')
-		console.log();
 		Meteor.users.update({_id: data.user._id}, {$set:{"profile.online":true}})
 	})
 
@@ -583,7 +608,6 @@ if (Meteor.isServer) {
 		rightClick: function(_hostName, coord){
 			x = coord.x;
 			y = coord.y;
-
 			var key = "board." + x + "_" + y + ".isMine";
 			var action = {};
 			action[key]
@@ -593,13 +617,14 @@ if (Meteor.isServer) {
 
 			if(isMine ==1){
 			//Om hittat mina RATT
-			var key = "board." + x + "_" + y + ".checked";
-			var action = {};
-			action[key] = 2;
- 			Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":1}})
-			Game.update({hostName: _hostName},{$set: action})
+				var key = "board." + x + "_" + y + ".checked";
+				var action = {};
+				action[key] = 2;
+	 			Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":10}})
+				Game.update({hostName: _hostName},{$set: action})
 			}else{
-				Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":-1}})
+
+				Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":-5}})
 			}
  			//Om fail
 		},
@@ -612,7 +637,14 @@ if (Meteor.isServer) {
 			var find = Game.find({hostName: _hostName}).fetch()
 			var isMine =find[0].board[coordinates.x+'_'+coordinates.y].isMine;
 			if(isMine ==1){
-				Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":-1}})
+				Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":-10}})
+			}else{
+				if(revealsize > 5){
+					Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":5}})	
+				}else{
+					Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":1}})	
+				}
+
 			}
 			Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.revealed":revealsize}})
 			Game.update({hostName: _hostName},{$set: queryObject})
@@ -629,6 +661,10 @@ if (Meteor.isServer) {
 		,
 		consoleLog: function(message){
 			console.log(message)
+		},
+		logoutUser: function(userid){
+			Meteor.users.update({_id: userid}, {$set:{"profile.online":false}});
+	
 		} 
 	});
 

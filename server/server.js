@@ -11,7 +11,7 @@
 
 
 	Meteor.publish('game', function(args){
-		return Game.find({"hostName": "AggeFan"});
+		return Game.find({"hostName": hostName});
 	});
 
 	Meteor.publish('allUsers', function(args){
@@ -76,10 +76,10 @@
 			var key = "board." + x + "_" + y + ".checked";
 			var action = {};
 			action[key] = 2;
- 			Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":1}})
+ 			Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":score.rightwin}})
 			Game.update({hostName: _hostName},{$set: action})
 			}else{
-				Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":-1}})
+				Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":score.rightfail}})
 			}
  			//Om fail
 		},
@@ -92,7 +92,14 @@
 			var find = Game.find({hostName: _hostName}).fetch()
 			var isMine =find[0].board[coordinates.x+'_'+coordinates.y].isMine;
 			if(isMine ==1){
-				Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":-1}})
+				Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":score.leftfail}})
+			}else{
+				if(revealsize > 5){
+					Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":score.reveal}})	
+				}else{
+					Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":score.leftwin}})	
+				}
+
 			}
 			Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.revealed":revealsize}})
 			Game.update({hostName: _hostName},{$set: queryObject})
@@ -109,6 +116,10 @@
 		,
 		consoleLog: function(message){
 			console.log(message)
+		},
+		logoutUser: function(userid){
+			Meteor.users.update({_id: userid}, {$set:{"profile.online":false}});
+	
 		} 
 	});
 

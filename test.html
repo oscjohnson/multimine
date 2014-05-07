@@ -1,4 +1,6 @@
 <body>
+
+	<link href='http://fonts.googleapis.com/css?family=Offside' rel='stylesheet' type='text/css'>
   	{{> game}}
 	{{> loginButtons}}
 
@@ -11,6 +13,7 @@
 		<canvas id="overlayCanvas" width="1000" height="1000"></canvas>
 	</div>
 	<button id="restartBoard">restart</button>
+	<button id="startBoard">START</button>
 
 
 </template>
@@ -18,17 +21,17 @@
 <template name="scoreboard">
 	<div id="scoreboard">
 		
-		<h1>scoreboard</h1>
 			<div class="header">
+		<h1>scoreboard</h1>
 				<div class="name">Name</div>
 				<div class="score">Score</div>
-				<div class="revealed">(Squares revealed)</div>
+
 			</div>
 		{{#each user}}
 			<div class="user {{currentUser}}">
 				<div class="name" >{{> name}}</div>
-				<div class="info-item"> {{> score}}</div>
-				<div class="info-item">( {{> revealed}})</div>
+				<div class="info-item score"> {{> score}}</div>
+
 				
 			</div>
 

@@ -3,7 +3,9 @@
 	margin: 0;
 	padding: 0;
 }
-
+button{
+	padding: 10px;
+}
 
 .selected{
 	background: red;
@@ -25,6 +27,9 @@
 .user div{
 	display: inline-block;
 }
+.user .score{
+	float: right;
+}
 
 .canvas-wrapper{
 	position: relative;
@@ -44,13 +49,14 @@
 	top: 0px;
 	right: 0px;
 	width: 300px;
+	font-family: Offside;
+
 }
 
 #scoreboard .header{
-
-		padding: 15px;
+	padding: 15px;
 	background: #919191;
-	color: rgb(247, 247, 247);
+	color:black;
 	margin-bottom: 4px;
 	margin-right: 4px;
 	width: 270px;
@@ -63,10 +69,15 @@
 #scoreboard .header .name{
 	font-size: 19px;
 	font-weight: bold;
+	color: rgb(87, 81, 81);
 }
-
+#scoreboard .header .score{
+	float:right;
+	color: rgb(87, 81, 81);
+}
 #scoreboard h1{
 	text-align: center;
+	margin-bottom: 6px;
 }
 .clearfix{
 	clear:both;

@@ -84,6 +84,7 @@
  			//Om fail
 		},
 		updateBoard : function(_hostName, coordinates, queryObject){
+
 			var revealsize= + Object.size(queryObject);
 			var key = "board." + coordinates.x + "_" + coordinates.y + ".isMine";
 			var action = {};
@@ -102,7 +103,9 @@
 
 			}
 			Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.revealed":revealsize}})
+  			var oldTime = new Date().getTime()
 			Game.update({hostName: _hostName},{$set: queryObject})
+			console.log("render took: " + (new Date().getTime() - oldTime)  + "ms")
 
 		},
 		clearBoard: function(_hostName){

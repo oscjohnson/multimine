@@ -23,14 +23,15 @@ Meteor.startup(function() {
 			game = doc;
 			board = game.board;
 			rightCanvasSize();
-			renderBoard(board)
 
+			renderBoard(board);
 		},
 		changed: function(newDoc, oldDoc){
 			oldboard = board 
 			game = newDoc;
 			board = game.board;
-			
+			var positions = [];
+		
 			//Stitch
 			for (var i = 0; i < game.width; i++) {
 				for (var j = 0; j < game.height; j++) {
@@ -40,10 +41,18 @@ Meteor.startup(function() {
 					else if((oldboard[i+"_"+j].checked == 2) && (board[i+"_"+j].checked == 0)){
 						board[i+"_"+j].checked = 2;
 					}
-  			};	  			
-  		};
+
+					if(board[i+"_"+j].checked == 1 && (oldboard[i+"_"+j].checked == 0)){
+						positions.push( {x:i, y:j} );
+					}
+					else if(board[i+"_"+j].checked == 2 && (oldboard[i+"_"+j].checked == 0)){
+						positions.push( {x:i, y:j} );
+					}
+
+  				};	  			
+  			};
 		
-			renderBoard(board)
+			render(positions);
 		}
 	});
 });
@@ -51,15 +60,18 @@ Meteor.startup(function() {
 
   	Template.game.events({
   		'click #overlayCanvas' : function(e){
-
-
   			var c = getCanvasCoordinates(e);
   			var coord = getBoardXY(c);
+  			queryObject = {};
+
   			//Om det behövs uppdateras gör det.
   			if(board[coord.x+'_'+coord.y].checked == '0'){
-	  			var o =discover(coord);
 
-	  			renderBoard(board)
+	  			var o =discover(coord);
+	  			
+	  			var queryObject = buildQuery(o);
+	  			render(o)
+
 	  			if(board[coord.x+'_'+coord.y].isMine == '1'){
 	  				//mine fail
 	  				printPoints(c, score.leftfail)
@@ -72,10 +84,11 @@ Meteor.startup(function() {
 	  					printPoints(c, score.leftwin);
 	  				}
 	  			}
-	  			Meteor.call('updateBoard',"AggeFan", coord, o);
+	  			Meteor.call('updateBoard',"AggeFan", coord, queryObject);
   				
   			}
   			apm++;
+
   		},
   		'contextmenu #overlayCanvas' : function(e){
   			e.preventDefault();
@@ -87,7 +100,7 @@ Meteor.startup(function() {
 	  			if(board[c.x +'_'+ c.y].isMine == 1){
 	  				//desarmerat mina
 	  				board[c.x+'_'+c.y].checked =2;
-	  				renderBoard(board)
+	  				renderSquare(c.x,c.y)
 	  				printPoints(coord, score.rightwin)
 	  			}else{
 	  				//failflash
@@ -104,7 +117,7 @@ Meteor.startup(function() {
   		},
   		'click #restartBoard' : function(){
 			Meteor.call('clearBoard',"AggeFan");
-			Meteor.call('createBoard','my fun game', 'AggeFan', 50 ,50);
+			Meteor.call('createBoard','my fun game', 'AggeFan', 25 ,15);
 			Meteor.call('removePoints');
   		},
   		'click #startBoard': function(){
@@ -178,6 +191,13 @@ function rightCanvasSize(){
 	var canvas =document.getElementById('overlayCanvas');
 	canvas.width = game.width*sizepadding;
 	canvas.height = game.height*sizepadding;
+
+}
+
+function render(o){
+	for (var i = 0; i < o.length; i++) {
+		renderSquare(o[i].x, o[i].y);
+	};
 
 }
 
@@ -274,8 +294,7 @@ function printletter(x,y, content,color,textcolor){
 
 
 function renderBoard(board){
-	//console.log('renderBoard')
-	var oldTime = new Date().getTime()
+	console.log('renderBoard')
 	
 	for(pos in board){
 
@@ -285,10 +304,20 @@ function renderBoard(board){
 		renderSquare(x,y);
 
 	}
-	console.log("render took: " + (new Date().getTime() - oldTime)  + "ms")
+
+}
+
+function buildQuery(positions){
+	var query = {}
+	for (var i = 0; i < positions.length; i++) {
+		var key = "board." + positions[i].x + "_" + positions[i].y + ".checked";
+		query[key] = 1;
+	};
+	return query;
 }
 
 function renderSquare(x,y){
+
 		var pos = x+"_"+y;
 
 		var green = "#4a4";
@@ -400,11 +429,8 @@ function randomRGB(){
 
 function discover(clickedSquare){
 
-
-
 	var recCounter =0;
-	var single = true;
-	var queryObject = {};//'{hostName:"AggeFan"}, {$set: {'
+	var positions = [];
 
 	function discoverField(clickedSquare){
 			var	number = + board[clickedSquare.x+'_'+clickedSquare.y].surroundingMines;
@@ -431,14 +457,15 @@ function discover(clickedSquare){
 					ystop= clickedSquare.y-1;
 				}
 
-				//console.log('start ' + (xstart-1) ' , '+ (ystart+1) + " - " )
+
 				for (var i = xstart-1; i <= xstop+1; i++) {
 					for (var j = ystart-1; j <= ystop+1; j++) {
 
 						if(board[i+"_"+j].checked != '1'){
-							single = false;
+
 							board[i+"_"+j].checked = '1';
-							addToQuery(i,j);
+							positions.push({x: i, y:j});
+
 							recCounter++;
 							discoverField({x:i,y:j});
 						}
@@ -452,23 +479,19 @@ function discover(clickedSquare){
 			if(recCounter > 0){
 
 				recCounter=0;
-				return queryObject;
+				return positions;
+
 			}else{
 				board[clickedSquare.x+"_"+clickedSquare.y].checked = '1';		
 				//single
-				addToQuery(clickedSquare.x,clickedSquare.y)
-				return queryObject; 
+				positions.push({x:clickedSquare.x, y:clickedSquare.y});
+
+				return positions;
 				recCounter=0;
 
 			}
 
 	}
 
-	function addToQuery(x, y){
-
-		var key = "board." + x + "_" + y + ".checked";
-		queryObject[key] = 1;
-
-	}
 	return discoverField(clickedSquare);
 }

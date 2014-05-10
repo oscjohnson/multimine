@@ -122,13 +122,13 @@ Meteor.startup(function() {
   		},
   		'click #startBoard': function(){
   			if($('#startBoard').text() == "START"){
-	  			$('#startBoard').text("STOP");
+	  			//$('#startBoard').text("STOP");
 	  			startTime = new Date().getTime();
   			}else{
   				var diff = new Date().getTime() -startTime;
 	  			console.log(diff);
 	  			console.log('apm: ' + apm/(diff/(60*1000) ) )
-	  			$('#startBoard').text("START");
+	  			//$('#startBoard').text("START");
 	  			startTime =0;
   			}
   		}

@@ -147,6 +147,14 @@ body{
 		display: block;
 		margin: 0 auto;
 	}
+	#createGame:active{
+		position: relative;
+		top: 2px;
+	}
+	#createGame:focus{
+		outline: 0;
+	
+	}
 	input[name="gameName"]{
 		color: #444;
 		width: 100%;
@@ -166,6 +174,17 @@ body{
 
 	}
 	
+	.creategame-wrapper .hint{
+		background: rgba(255,0,0,0.7);
+		padding: 5px;
+		color: white;
+		/* border-radius: 6px; */
+		position: relative;
+		top: -54px;
+		right: -257px;
+		font-size: 9px;
+		border: 1px solid red;
+	}
 
 	.select-board-size li{
 		cursor: pointer;

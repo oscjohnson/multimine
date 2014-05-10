@@ -56,7 +56,21 @@ Meteor.startup(function() {
 		}
 	});
 });
+  	Template.creategame.events({
+  		'click #createGame' : function(){
+  			size = $('.creategame-wrapper .select-board-size .selected').data('size');
+  			var size;
+  			switch(size){
+  				case "small": side = 15; break;
+  				case "medium": side = 25; break;
+  				case "large": side = 35; break;
+  			}
+  			name = $('.creategame-wrapper input[name="gameName"]').val();
+  			Meteor.call("clearBoard", Meteor.userId());
+  			Meteor.call("createBoard", name ,Meteor.userId(), side ,side);
 
+  		}
+  	});
 
   	Template.game.events({
   		'click #overlayCanvas' : function(e){

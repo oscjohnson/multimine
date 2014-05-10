@@ -49,7 +49,7 @@
 				}
 			}
 
-			var gameID = Game.insert({hostName: hostName, hostName: _hostName,
+			var gameID = Game.insert({gameName: _gameName, hostName: _hostName,
 				board: _board, width: w, height: h, version: 0 });
 			
 			

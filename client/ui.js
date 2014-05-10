@@ -18,10 +18,10 @@ $boardSizeItem.on('click', function(){
     //$('body').fadeOut('slow',function(){
     	//$('body').fadeIn('slow', function(){
 
-    		 window.location = "http://localhost"
+    		 // window.location = "http://localhost"
     	// });
     // });
-
+  
     e.preventDefault();
   });
 

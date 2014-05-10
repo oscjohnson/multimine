@@ -75,7 +75,6 @@
 						console.log(err)
 					} else{
 						Meteor.call('removePoints');
-						Session.set('gameID', data);
 						Meteor.call('createBoard','my fun game', 'AggeFan', 30, 30, function(err, data){
 							if(err){
 								console.log(err)

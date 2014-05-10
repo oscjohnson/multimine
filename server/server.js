@@ -10,14 +10,24 @@
 	});
 
 
-	Meteor.publish('game', function(args){
-		return Game.find({"hostName": hostName});
+	Meteor.publish('game', function(userId){
+		if(userId != null)
+			return Game.find({"hostName": hostName});
 	});
 
 	Meteor.publish('allUsers', function(args){
 		return Meteor.users.find({"profile.online": true}, {fields:{'emails':1, 'profile.score': 1, 'profile.revealed': 1}});
 	});
-	//Meteor.publish('userData', function(){return Meteor.users.find()	});
+
+	//Deny cowboy inserts and updates
+	Game.allow({
+		insert: function(){
+			return false;
+		},
+		update: function(){
+			return false;
+		},
+	})
 
 	Meteor.methods({
 		createBoard: function(_gameName, _hostName, w, h){

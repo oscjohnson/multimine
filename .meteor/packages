@@ -8,3 +8,4 @@ insecure
 accounts-base
 accounts-password
 accounts-ui
+iron-router

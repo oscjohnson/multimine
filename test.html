@@ -1,11 +1,12 @@
 <body>
 
 	<link href='http://fonts.googleapis.com/css?family=Offside' rel='stylesheet' type='text/css'>
-  	{{> game}}
-	{{> loginButtons}}
-
-	{{> scoreboard}}
 </body>
+
+<template name="login">
+	<h1>Please login to play</h1>
+	{{> loginButtons}}
+</template>
 
 <template name="game">
 	<div class="canvas-wrapper">
@@ -14,8 +15,8 @@
 	</div>
 	<button id="restartBoard">restart</button>
 	<button id="startBoard">START</button>
-
-
+	{{> scoreboard}}
+	{{> loginButtons}}
 </template>
 
 <template name="scoreboard">

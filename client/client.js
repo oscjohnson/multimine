@@ -2,6 +2,7 @@
 	var board;
 	var userid;
 	var startTime;
+	var apm = 0;
 
 	Deps.autorun(function(){
 		if(!Meteor.userId()){
@@ -19,59 +20,57 @@
 	});
 
 
-	  	Template.game.events({
-	  		'click #overlayCanvas' : function(e){
 
+  	Template.game.events({
+  		'click #overlayCanvas' : function(e){
+  			var c = getCanvasCoordinates(e);
+  			var coord = getBoardXY(c);
+  			queryObject = {};
 
-	  			var c = getCanvasCoordinates(e);
-	  			var coord = getBoardXY(c);
-	  			//Om det behövs uppdateras gör det.
-	  			if(board[coord.x+'_'+coord.y].checked == '0'){
-		  			var o =discover(coord);
+  			//Om det behövs uppdateras gör det.
+  			if(board[coord.x+'_'+coord.y].checked == '0'){
 
-		  			renderBoard(board)
-		  			if(board[coord.x+'_'+coord.y].isMine == '1'){
-		  				//mine fail
-		  				printPoints(c, score.leftfail)
-		  			}else{
-		  				//mine win
+	  			var o =discover(coord);
+	  			
+	  			var queryObject = buildQuery(o);
+	  			render(o)
 
+	  			if(board[coord.x+'_'+coord.y].isMine == '1'){
+	  				//mine fail
+	  				printPoints(c, score.leftfail)
+	  			}else{
+	  				//mine win
 		  				if(Object.size(o) > 5){
 		  					printPoints(c, score.reveal);
 		  				}else{
 		  					printPoints(c, score.leftwin);
 		  				}
-		  			}
-		  			Meteor.call('updateBoard',"AggeFan", coord, o);
-	  				
 	  			}
-	  			apm++;
-	  		},
-	  		'contextmenu #overlayCanvas' : function(e){
-	  			e.preventDefault();
-	  			var coord =getCanvasCoordinates(e);
-	  			var c = getBoardXY(getCanvasCoordinates(e));
+	  			Meteor.call('updateBoard',"AggeFan", coord, queryObject);
+  			}
+  			apm++;
 
-	  			if(board[c.x+'_'+c.y].checked == '0'){
+  		},
+  		'contextmenu #overlayCanvas' : function(e){
+  			e.preventDefault();
+  			var coord =getCanvasCoordinates(e);
+  			var c = getBoardXY(getCanvasCoordinates(e));
 
-		  			if(board[c.x +'_'+ c.y].isMine == 1){
-		  				//desarmerat mina
-		  				board[c.x+'_'+c.y].checked =2;
-		  				renderBoard(board)
-		  				printPoints(coord, score.rightwin)
-		  			}else{
-		  				//failflash
-		  				failanimation(c);
-		  				printPoints(coord, score.rightfail)
-		  			}
-	  				Meteor.call('rightClick', "AggeFan", c);
-	  			
+  			if(board[c.x+'_'+c.y].checked == '0'){
 
+	  			if(board[c.x +'_'+ c.y].isMine == 1){
+	  				//desarmerat mina
+	  				board[c.x+'_'+c.y].checked =2;
+	  				renderSquare(c.x,c.y)
+	  				printPoints(coord, score.rightwin)
 	  			}else{
-	  				// console.log('already checked')
+	  				failanimation(c);
+	  				printPoints(coord, score.rightfail);
 	  			}
+	  			Meteor.call('rightClick','AggeFan', c);
+	  		}
 	  			apm++;
-	  		},
+	  	},
 	  		'click #restartBoard' : function(){
 				Meteor.call('clearBoard',"AggeFan");
 				Meteor.call('createBoard','my fun game', 'AggeFan', 30, 30);
@@ -109,7 +108,8 @@
 						oldboard = board 
 						game = newDoc;
 						board = game.board;
-				
+						var positions = [];
+		
 						//Stitch
 						for (var i = 0; i < game.width; i++) {
 							for (var j = 0; j < game.height; j++) {
@@ -119,9 +119,17 @@
 								else if((oldboard[i+"_"+j].checked == 2) && (board[i+"_"+j].checked == 0)){
 									board[i+"_"+j].checked = 2;
 								}
+
+								if(board[i+"_"+j].checked == 1 && (oldboard[i+"_"+j].checked == 0)){
+									positions.push( {x:i, y:j} );
+								}
+								else if(board[i+"_"+j].checked == 2 && (oldboard[i+"_"+j].checked == 0)){
+									positions.push( {x:i, y:j} );
+								}
+
 			  				};	  			
 			  			};
-						renderBoard(board)
+						render(positions);
 					}
 				});
 		};
@@ -160,18 +168,25 @@
 				return Meteor.users.find( this._id  ).fetch()[0].profile.revealed
 		//	}
 		}	
-	// Functions
-	function rightCanvasSize(){
+// Functions
+function rightCanvasSize(){
 
-		var canvas =document.getElementById('gameCanvas');
-		canvas.width = game.width*sizepadding;
-		canvas.height = game.height*sizepadding;
+	var canvas =document.getElementById('gameCanvas');
+	canvas.width = game.width*sizepadding;
+	canvas.height = game.height*sizepadding;
 
-		var canvas =document.getElementById('overlayCanvas');
-		canvas.width = game.width*sizepadding;
-		canvas.height = game.height*sizepadding;
+	var canvas =document.getElementById('overlayCanvas');
+	canvas.width = game.width*sizepadding;
+	canvas.height = game.height*sizepadding;
+}
 
-	}
+function render(o){
+	for (var i = 0; i < o.length; i++) {
+		renderSquare(o[i].x, o[i].y);
+	};
+
+}
+
 
 	function failanimation(c){
 		var globalID = requestAnimationFrame(repeatOften);
@@ -265,23 +280,35 @@
 	}
 
 
-	function renderBoard(board){
-		//console.log('renderBoard')
-		var oldTime = new Date().getTime()
-		
-		for(pos in board){
 
-			var xy = pos.split("_");
-			var x = +xy[0]
-			var y = +xy[1]
-			renderSquare(x,y);
+function renderBoard(board){
+	console.log('renderBoard')
+	
+	for(pos in board){
 
-		}
-		console.log("render took: " + (new Date().getTime() - oldTime)  + "ms")
+		var xy = pos.split("_");
+		var x = +xy[0]
+		var y = +xy[1]
+		renderSquare(x,y);
+
 	}
+		
+}
 
-	function renderSquare(x,y){
-			var pos = x+"_"+y;
+
+
+function buildQuery(positions){
+	var query = {}
+	for (var i = 0; i < positions.length; i++) {
+		var key = "board." + positions[i].x + "_" + positions[i].y + ".checked";
+		query[key] = 1;
+	};
+	return query;
+}
+
+function renderSquare(x,y){
+
+		var pos = x+"_"+y;
 
 			var green = "#4a4";
 			var red ="#a44";
@@ -323,10 +350,9 @@
 				}
 
 			}
+}
 
-	}
-
-	function paintOverlay(){
+function paintOverlay(){
 			var x = 2.5, y= 2.5, color ="#FF0";
 
 			var gameCanvas = $("#overlayCanvas");
@@ -392,11 +418,8 @@
 
 	function discover(clickedSquare){
 
-
-
-		var recCounter =0;
-		var single = true;
-		var queryObject = {};//'{hostName:"AggeFan"}, {$set: {'
+	var recCounter =0;
+	var positions = [];
 
 		function discoverField(clickedSquare){
 				var	number = + board[clickedSquare.x+'_'+clickedSquare.y].surroundingMines;
@@ -423,44 +446,37 @@
 						ystop= clickedSquare.y-1;
 					}
 
-					//console.log('start ' + (xstart-1) ' , '+ (ystart+1) + " - " )
+
 					for (var i = xstart-1; i <= xstop+1; i++) {
 						for (var j = ystart-1; j <= ystop+1; j++) {
 
 							if(board[i+"_"+j].checked != '1'){
-								single = false;
+
 								board[i+"_"+j].checked = '1';
-								addToQuery(i,j);
+								positions.push({x: i, y:j});
+
 								recCounter++;
 								discoverField({x:i,y:j});
 							}
-
 						};
 					};
-
-
 				}
 					
 				if(recCounter > 0){
 
-					recCounter=0;
-					return queryObject;
-				}else{
-					board[clickedSquare.x+"_"+clickedSquare.y].checked = '1';		
-					//single
-					addToQuery(clickedSquare.x,clickedSquare.y)
-					return queryObject; 
-					recCounter=0;
+				recCounter=0;
+				return positions;
+
+			}else{
+				board[clickedSquare.x+"_"+clickedSquare.y].checked = '1';		
+				//single
+				positions.push({x:clickedSquare.x, y:clickedSquare.y});
+
+				return positions;
+				recCounter=0;
 
 				}
 
 		}
-
-		function addToQuery(x, y){
-
-			var key = "board." + x + "_" + y + ".checked";
-			queryObject[key] = 1;
-
-		}
 		return discoverField(clickedSquare);
-}
+	}

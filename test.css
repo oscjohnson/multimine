@@ -2,9 +2,13 @@
 *{
 	margin: 0;
 	padding: 0;
+	box-sizing: border-box;
 }
 button{
 	padding: 10px;
+}
+body{
+	font-family: Offside;
 }
 
 .selected{
@@ -90,3 +94,84 @@ button{
 	background: #BDD7FF !important;
 
 }
+
+/* Create game template styling */
+
+	.creategame-wrapper{
+		font-family: Offside;
+		width:600px;
+		border: 1px solid #eee;
+		margin: 0 auto;
+		padding: 20px 100px;
+		margin-top: 40px;
+		border: 1px solid #ddd;
+		padding-bottom: 60px;
+
+		background: #ffffff; /* Old browsers */
+		background: -moz-radial-gradient(center, ellipse cover, #ffffff 0%, #eeeeee 100%); /* FF3.6+ */
+		background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#ffffff), color-stop(100%,#eeeeee)); /* Chrome,Safari4+ */
+		background: -webkit-radial-gradient(center, ellipse cover, #ffffff 0%,#eeeeee 100%); /* Chrome10+,Safari5.1+ */
+		background: -o-radial-gradient(center, ellipse cover, #ffffff 0%,#eeeeee 100%); /* Opera 12+ */
+		background: -ms-radial-gradient(center, ellipse cover, #ffffff 0%,#eeeeee 100%); /* IE10+ */
+		background: radial-gradient(ellipse at center, #ffffff 0%,#eeeeee 100%); /* W3C */
+		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#eeeeee',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+	
+		-webkit-transition: all 2s;
+
+
+
+	}
+
+
+	.creategame-wrapper h4{
+		margin-bottom: 8px;
+	}
+
+	select{
+		font-size: 20px;
+		padding: 20px;
+	}
+	optgroup{
+
+		font-size: 14px;
+	}
+	
+	#createGame{
+		font-family: Offside;
+		text-align: center;
+		width: 100%;
+		font-size: 20px; 
+		color: white;
+		background: #aaa;
+		border: 0;
+		display: block;
+		margin: 0 auto;
+	}
+	input[name="gameName"]{
+		color: #444;
+		width: 100%;
+		display: block;
+		font-size: 16px;
+		padding: 10px;
+		margin: 0px auto;
+		border: 1px solid #888;
+		margin-bottom: 20px;
+		font-family: Offside;
+	}
+
+	.select-board-size{
+		border: 1px solid #888;
+		list-style-type: none;
+		margin-bottom:20px; 
+
+	}
+	
+
+	.select-board-size li{
+		cursor: pointer;
+		padding: 10px;
+	}
+	.select-board-size li.selected{
+		background: #60BAD1;
+	}
+/* END Create game template styling */

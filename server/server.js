@@ -1,4 +1,4 @@
-
+	
 	Accounts.onLogin(function(data){
 		Meteor.users.update({_id: data.user._id}, {$set:{"profile.online":true}})
 	})
@@ -10,9 +10,12 @@
 	});
 
 
-	Meteor.publish('game', function(userId){
-		if(userId != null)
-			return Game.find({"hostName": hostName});
+	Meteor.publish('game', function(userId, gameID){
+		if(userId != null){
+			// currentGameID = gameToReturn.fetch()[0]._id
+			return Game.find(gameID);
+		}
+			
 	});
 
 	Meteor.publish('allUsers', function(args){
@@ -57,16 +60,10 @@
 					_board[i+'_'+j].surroundingMines = checkSurroundingsForMines(_board, {x:i, y:j});
 
 				}
-			}
+			} 
 
-			var gameID = Game.insert({hostName: hostName, hostName: _hostName,
+			return Game.insert({hostName: hostName,
 				board: _board, width: w, height: h, version: 0 });
-			
-			
-
-			console.log("CREATED GAME")
-
-			return gameID;
 		},
 		rightClick: function(_hostName, coord){
 			x = coord.x;
@@ -112,14 +109,14 @@
 				}
 
 			}
-			Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.revealed":revealsize}})
-  			var oldTime = new Date().getTime()
+			Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.revealed":revealsize}})	
 			Game.update({hostName: _hostName},{$set: queryObject})
-			console.log("render took: " + (new Date().getTime() - oldTime)  + "ms")
+		
 
 		},
 		clearBoard: function(_hostName){
 			Game.remove({hostName: _hostName});
+			return 0;
 		},
 		removePoints: function(){
 			Meteor.users.update({}, {$set:{"profile.score":0}}, {multi: true})
@@ -133,7 +130,7 @@
 		logoutUser: function(userid){
 			Meteor.users.update({_id: userid}, {$set:{"profile.online":false}});
 	
-		} 
+		}
 	});
 
 

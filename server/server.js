@@ -1,4 +1,4 @@
-	
+
 	Accounts.onLogin(function(data){
 		Meteor.users.update({_id: data.user._id}, {$set:{"profile.online":true}})
 	})
@@ -13,18 +13,21 @@
 
 	Meteor.publish('game', function(userId, gameID){
 		if(userId != null){
-			// currentGameID = gameToReturn.fetch()[0]._id
-			return Game.find(gameID);
+			console.log(gameID)
+			if(gameID != null){
+				// gå till game aka skicka den subscribem
+				return Game.find(gameID);
+			}
+			else
+				return Game.find({},{fields: {'gameName': 1, 'hostName': 1}});
 		}
-			
-
 	});
 
 	Meteor.publish('allUsers', function(args){
 		return Meteor.users.find({"profile.online": true}, {fields:{'emails':1, 'profile.score': 1, 'profile.revealed': 1}});
 	});
 
-	//Deny cowboy inserts and updates
+	// Deny cowboy inserts and updates
 	Game.allow({
 		insert: function(){
 			return false;
@@ -69,7 +72,7 @@
 			return Game.insert({gameName: _gameName, hostName: _hostName,
 				board: _board, width: w, height: h, version: 0 });
 		},
-		rightClick: function(_hostName, coord){
+		rightClick: function(_gameID, coord){
 			x = coord.x;
 			y = coord.y;
 
@@ -77,31 +80,31 @@
 			var action = {};
 			action[key]
 
-			var find = Game.find({hostName: _hostName}).fetch()
+			var find = Game.find(_gameID).fetch()
 			var isMine =find[0].board[x+'_'+y].isMine;
 
 			console.log(isMine)
 
 			if(isMine == 1){
-			//Om hittat mina RATT
-			var key = "board." + x + "_" + y + ".checked";
-			var action = {};
-			action[key] = 2;
- 			Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":score.rightwin}})
-			Game.update({hostName: _hostName},{$set: action})
-			}else{
-				Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":score.rightfail}})
-			}
- 			//Om fail
+				// Om hittat mina RATT
+				var key = "board." + x + "_" + y + ".checked";
+				var action = {};
+				action[key] = 2;
+	 			Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":score.rightwin}})
+				Game.update(_gameID,{$set: action})
+				}else{
+					Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":score.rightfail}})
+				}
+ 				// Om fail
 		},
-		updateBoard : function(_hostName, coordinates, queryObject){
+		updateBoard : function(_gameID, coordinates, queryObject){
 
 			var revealsize= + Object.size(queryObject);
 			var key = "board." + coordinates.x + "_" + coordinates.y + ".isMine";
 			var action = {};
 			action[key]
 
-			var find = Game.find({hostName: _hostName}).fetch()
+			var find = Game.find(_gameID).fetch()
 			var isMine =find[0].board[coordinates.x+'_'+coordinates.y].isMine;
 			if(isMine ==1){
 				Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":score.leftfail}})
@@ -114,7 +117,7 @@
 
 			}
 			Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.revealed":revealsize}})	
-			Game.update({hostName: _hostName},{$set: queryObject})
+			Game.update(_gameID,{$set: queryObject})
 		
 
 		},

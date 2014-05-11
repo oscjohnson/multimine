@@ -6,20 +6,19 @@
 	var curs;
 
 	Deps.autorun(function(){
-		Meteor.subscribe('game', Meteor.userId(), Session.get('gameID'));
+		console.log("deps")
 		Meteor.subscribe('allUsers');
 		if(!Meteor.userId()){
 			Meteor.call('logoutUser', userid);
+			Session.set("gameID", null)
 		}else{
 			userid = Meteor.userId();
 		}
 	})
 
-
 	Meteor.subscribe('allUsers');
 	  	
 	Meteor.startup(function() {
-		console.log('client startup')
 	});
 
   	Template.creategame.events({
@@ -32,14 +31,21 @@
   				case "large": side = 35; break;
   			}
   			name = $('.creategame-wrapper input[name="gameName"]').val();
-  			//Meteor.userId()
-  			Meteor.call("clearBoard", "AggeFan");
-  			Meteor.call("createBoard", name, "AggeFan", side, side);
-
-
+  			Meteor.call('createBoard',name, Meteor.userId(), side, side, function(err, data){
+							if(err){
+								console.log(err)
+							} else{
+								Session.set('gameID', data);
+								Router.go('game')
+							  }		
+						});
+  			
   		}
   	});
 
+  	Template.login.rendered = function(){
+  		Router.go('lobby');
+  	}
 
   	Template.game.events({
   		'click #overlayCanvas' : function(e){
@@ -66,7 +72,7 @@
 		  					printPoints(c, score.leftwin);
 		  				}
 	  			}
-	  			Meteor.call('updateBoard',"AggeFan", coord, queryObject);
+	  			Meteor.call('updateBoard',Session.get('gameID'), coord, queryObject);
   			}
   			apm++;
 
@@ -87,7 +93,7 @@
 	  				failanimation(c);
 	  				printPoints(coord, score.rightfail);
 	  			}
-	  			Meteor.call('rightClick','AggeFan', c);
+	  			Meteor.call('rightClick',Session.get('gameID'), c);
 	  		}
 	  			apm++;
 	  	},
@@ -123,44 +129,67 @@
 	  		}
 	  	});
 
+		Template.lobby.rendered = function(){
+
+		}
+
+		Template.lobby.events({
+			'click #createGame': function(){
+				Router.go('create');
+			}
+		});
+
+		Template.lobby.game = function(){
+			return Game.find();
+		}
+
 		/*
 		Runs once as the template got rendered.
 		*/
 	  	Template.game.rendered = function() {
-	  			curs = Game.find({hostName: "AggeFan"});
+
+	  			curs = Game.find();
+	  			
 				curs.observe({
+
 					added: function(doc, beforeIndex){
-						game = doc;
-						board = game.board;
-						rightCanvasSize();
-						renderBoard(board)
+						console.log("added")
+						if(!Session.equals("gameID", null)){
+							game = doc;
+							board = game.board;
+							rightCanvasSize();
+							renderBoard(board)
+						}
 					},
 					changed: function(newDoc, oldDoc){
-						oldboard = board 
-						game = newDoc;
-						board = game.board;
-						var positions = [];
-		
-						//Stitch
-						for (var i = 0; i < game.width; i++) {
-							for (var j = 0; j < game.height; j++) {
-								if((oldboard[i+"_"+j].checked == 1) && (board[i+"_"+j].checked == 0)){
-									board[i+"_"+j].checked = 1;
-								}
-								else if((oldboard[i+"_"+j].checked == 2) && (board[i+"_"+j].checked == 0)){
-									board[i+"_"+j].checked = 2;
-								}
+						console.log("changed")
+						if(!Session.equals("gameID", null)){
+							oldboard = board 
+							game = newDoc;
+							board = game.board;
+							var positions = [];
+			
+							//Stitch
+							for (var i = 0; i < game.width; i++) {
+								for (var j = 0; j < game.height; j++) {
+									if((oldboard[i+"_"+j].checked == 1) && (board[i+"_"+j].checked == 0)){
+										board[i+"_"+j].checked = 1;
+									}
+									else if((oldboard[i+"_"+j].checked == 2) && (board[i+"_"+j].checked == 0)){
+										board[i+"_"+j].checked = 2;
+									}
 
-								if(board[i+"_"+j].checked == 1 && (oldboard[i+"_"+j].checked == 0)){
-									positions.push( {x:i, y:j} );
-								}
-								else if(board[i+"_"+j].checked == 2 && (oldboard[i+"_"+j].checked == 0)){
-									positions.push( {x:i, y:j} );
-								}
+									if(board[i+"_"+j].checked == 1 && (oldboard[i+"_"+j].checked == 0)){
+										positions.push( {x:i, y:j} );
+									}
+									else if(board[i+"_"+j].checked == 2 && (oldboard[i+"_"+j].checked == 0)){
+										positions.push( {x:i, y:j} );
+									}
 
-			  				};	  			
-			  			};
-						render(positions);
+				  				};	  			
+				  			};
+							render(positions);
+						}
 					}
 				});
 		};

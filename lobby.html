@@ -1,0 +1,10 @@
+<template name="lobby">
+<h1>Lobby</h1>
+		<ul>
+		{{#each game}}
+		<li>{{gameName}} - {{_id}}</li>
+		{{/each}}
+		</ul>
+		<button id="createGame">Create Game</button>
+		{{> loginButtons}}
+</template>

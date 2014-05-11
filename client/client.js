@@ -3,6 +3,7 @@
 	var userid;
 	var startTime;
 	var apm = 0;
+	var handle;
 
 	Deps.autorun(function(){
 		if(!Meteor.userId()){
@@ -13,13 +14,30 @@
 	})
 
 	Meteor.subscribe('game', Meteor.userId());
+
 	Meteor.subscribe('allUsers');
 	  	
 	Meteor.startup(function() {
-		console.log(Game.find().fetch());
+		console.log('client startup')
 	});
 
+  	Template.creategame.events({
+  		'click #createGame' : function(){
+  			size = $('.creategame-wrapper .select-board-size .selected').data('size');
+  			var size;
+  			switch(size){
+  				case "small": side = 15; break;
+  				case "medium": side = 25; break;
+  				case "large": side = 35; break;
+  			}
+  			name = $('.creategame-wrapper input[name="gameName"]').val();
+  			//Meteor.userId()
+  			Meteor.call("clearBoard", "AggeFan");
+  			Meteor.call("createBoard", name, "AggeFan", side, side);
 
+
+  		}
+  	});
 
   	Template.game.events({
   		'click #overlayCanvas' : function(e){
@@ -73,7 +91,7 @@
 	  	},
 	  		'click #restartBoard' : function(){
 				Meteor.call('clearBoard',"AggeFan");
-				Meteor.call('createBoard','my fun game', 'AggeFan', 30, 30);
+				Meteor.call('createBoard', game.gameName, "AggeFan", game.width, game.height);
 				Meteor.call('removePoints');
 	  		},
 	  		'click #startBoard': function(){
@@ -141,6 +159,11 @@
 			}
 		}
 		
+		Template.creategame.loading = function(){
+			console.log(handle.ready())
+			// return handle.ready();
+		}
+
 		Template.scoreboard.currentUser = function(){
 			if(Meteor.userId() == this._id){
 

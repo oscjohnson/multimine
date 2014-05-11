@@ -12,7 +12,7 @@
 
 	Meteor.publish('game', function(userId){
 		if(userId != null)
-			return Game.find({"hostName": hostName});
+			return Game.find();
 	});
 
 	Meteor.publish('allUsers', function(args){
@@ -31,6 +31,7 @@
 
 	Meteor.methods({
 		createBoard: function(_gameName, _hostName, w, h){
+			
 			width = w;
 			height = h;
 			hostName = _hostName;
@@ -59,7 +60,7 @@
 				}
 			}
 
-			var gameID = Game.insert({hostName: hostName, hostName: _hostName,
+			var gameID = Game.insert({gameName: _gameName, hostName: _hostName,
 				board: _board, width: w, height: h, version: 0 });
 			
 			

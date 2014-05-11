@@ -1,33 +1,15 @@
 jQuery(document).ready(function() {
+	console.log('ui.js')
 
-$('body').css('display', 'none');
-$('body').fadeIn('fast');
+	// $('body').css('display', 'none');
+	// $('body').fadeIn('fast');
 
-var $boardSizeItem = $('.select-board-size li');
+	var $boardSizeItem = $('.select-board-size li');
 
-$boardSizeItem.on('click', function(){
-	$boardSizeItem.removeClass('selected');
-	$(this).addClass('selected');
-});
-
-
-
-
-  $('#createGame').click(function(e){
-    // window.goto="http://localhost";
-    //$('body').fadeOut('slow',function(){
-    	//$('body').fadeIn('slow', function(){
-
-    		 window.location = "http://localhost"
-    	// });
-    // });
-
-    e.preventDefault();
-  });
-
-
-
-
+	$('body').on('click', '.select-board-size li' , function(){
+		$('.select-board-size li').removeClass('selected');
+		$(this).addClass('selected');
+	});
 
 
 

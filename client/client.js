@@ -6,11 +6,14 @@
 	var curs;
 
 	Deps.autorun(function(){
-		console.log("deps")
+		if(!Session.equals('gameID', undefined)){
+			localStorage.setItem('gameID', Session.get('gameID'))
+		}
 		Meteor.subscribe('allUsers');
 		if(!Meteor.userId()){
 			Meteor.call('logoutUser', userid);
 			Session.set("gameID", null)
+			// localStorage.setItem('gameID', null);
 		}else{
 			userid = Meteor.userId();
 		}
@@ -18,7 +21,10 @@
 
 	Meteor.subscribe('allUsers');
 	  	
+
 	Meteor.startup(function() {
+		// If the user accidently refreshes page
+		 Session.set("gameID", localStorage.getItem("gameID"));
 	});
 
   	Template.creategame.events({

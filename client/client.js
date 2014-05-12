@@ -139,8 +139,9 @@
 			},
 			'click .game-listitem': function(e){
 				var $this = $(e.target);
-				var id = $this.data('game');
-				Session.set('gameID', id);
+				var gameid = $this.data('game');
+				Meteor.call('joinGame', gameid, Meteor.userId());
+				Session.set('gameID', gameid);
 				Router.go('game');
 			}
 		});

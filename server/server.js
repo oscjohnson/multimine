@@ -13,7 +13,7 @@
 
 	Meteor.publish('game', function(userId, gameID){
 		if(userId != null){
-			console.log(gameID)
+
 			if(gameID != null){
 				// gå till game aka skicka den subscribem
 				return Game.find(gameID);
@@ -67,45 +67,56 @@
 
 				}
 			} 
-
-
-			return Game.insert({gameName: _gameName, hostName: _hostName,
-				board: _board, width: w, height: h, version: 0 });
+			
+			var players= [{id: hostName}];
+			
+			
+			
+			return Game.insert({
+						gameName: _gameName, 
+						hostName: _hostName,
+						board: _board, 
+						width: w, 
+						height: h,
+						players: players,
+						version: 0 
+					});
 		},
 		rightClick: function(_gameID, coord){
 			x = coord.x;
 			y = coord.y;
 
-			var key = "board." + x + "_" + y + ".isMine";
-			var action = {};
-			action[key]
+			// var key = "board." + x + "_" + y + ".isMine";
+			// var action = {};
+			// action[key]
 
 			var find = Game.find(_gameID).fetch()
 			var isMine =find[0].board[x+'_'+y].isMine;
 
-			console.log(isMine)
 
 			if(isMine == 1){
-				// Om hittat mina RATT
+
 				var key = "board." + x + "_" + y + ".checked";
 				var action = {};
 				action[key] = 2;
 	 			Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":score.rightwin}})
 				Game.update(_gameID,{$set: action})
-				}else{
-					Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":score.rightfail}})
-				}
- 				// Om fail
+			}else{
+				Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":score.rightfail}})
+			}
+
 		},
 		updateBoard : function(_gameID, coordinates, queryObject){
 
 			var revealsize= + Object.size(queryObject);
-			var key = "board." + coordinates.x + "_" + coordinates.y + ".isMine";
-			var action = {};
-			action[key]
+			
+			// var key = "board." + coordinates.x + "_" + coordinates.y + ".isMine";
+			// var action = {};
+			// action[key]
 
 			var find = Game.find(_gameID).fetch()
 			var isMine =find[0].board[coordinates.x+'_'+coordinates.y].isMine;
+
 			if(isMine ==1){
 				Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":score.leftfail}})
 			}else{
@@ -129,8 +140,16 @@
 			Meteor.users.update({}, {$set:{"profile.score":0}}, {multi: true})
 			Meteor.users.update({}, {$set:{"profile.revealed":0}}, {multi: true})
 
-		}
-		,
+		},
+
+		joinGame: function(gameID, userID){
+
+			//Remove user if exists to avoid duplications
+			Game.update( gameID, {$pull: { players: {id:userID } } });
+			//Insert user
+			Game.update( gameID, {$push: { players: {id:userID } } });
+
+		},
 		consoleLog: function(message){
 			console.log(message)
 		},

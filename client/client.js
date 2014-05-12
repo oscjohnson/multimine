@@ -136,6 +136,12 @@
 		Template.lobby.events({
 			'click #createGame': function(){
 				Router.go('create');
+			},
+			'click .game-listitem': function(e){
+				var $this = $(e.target);
+				var id = $this.data('game');
+				Session.set('gameID', id);
+				Router.go('game');
 			}
 		});
 

@@ -137,6 +137,7 @@ body{
 	}
 	
 	#createGame{
+		cursor: pointer;
 		font-family: Offside;
 		text-align: center;
 		width: 100%;
@@ -151,10 +152,12 @@ body{
 		position: relative;
 		top: 2px;
 	}
-	#createGame:focus{
-		outline: 0;
+	#createGame:focus{outline: 0;}
 	
+	#createGame:hover{
+		/*background: #9F9F9F;*/
 	}
+
 	input[name="gameName"]{
 		color: #444;
 		width: 100%;
@@ -185,7 +188,10 @@ body{
 		font-size: 9px;
 		border: 1px solid red;
 	}
-
+	.game-listitem{
+		padding: 5px;
+		cursor: default;
+	}
 	.select-board-size li{
 		cursor: pointer;
 		padding: 10px;

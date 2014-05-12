@@ -2,7 +2,7 @@
 <h1>Lobby</h1>
 		<ul>
 		{{#each game}}
-		<li>{{gameName}} - {{_id}}</li>
+		<li class="game-listitem" data-game="{{_id}}">{{gameName}} - {{_id}}</li>
 		{{/each}}
 		</ul>
 		<button id="createGame">Create Game</button>

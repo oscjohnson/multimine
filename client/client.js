@@ -6,7 +6,7 @@
 	var curs;
 
 	Deps.autorun(function(){
-		console.log("deps")
+
 		Meteor.subscribe('allUsers');
 		if(!Meteor.userId()){
 			Meteor.call('logoutUser', userid);
@@ -97,35 +97,8 @@
 	  		}
 	  			apm++;
 	  	},
-	  		'click #restartBoard' : function(){
-
-				Meteor.call('clearBoard',"AggeFan", function(err, data){
-					if(err){
-						console.log(err)
-					} else{
-						Meteor.call('removePoints');
-						Meteor.call('createBoard','my fun game', 'AggeFan', 30, 30, function(err, data){
-							if(err){
-								console.log(err)
-							} else{
-								Session.set('gameID', data);
-							  }		
-						});
-					   }
-				});
-
-	  		},
-	  		'click #startBoard': function(){
-	  			if($('#startBoard').text() == "START"){
-		  			$('#startBoard').text("STOP");
-		  			startTime = new Date().getTime();
-	  			}else{
-	  				var diff = new Date().getTime() -startTime;
-		  			console.log(diff);
-		  			console.log('apm: ' + apm/(diff/(60*1000) ) )
-		  			$('#startBoard').text("START");
-		  			startTime =0;
-	  			}
+	  		'click #back' : function(){
+	  			Router.go('lobby');
 	  		}
 	  	});
 
@@ -160,7 +133,6 @@
 				curs.observe({
 
 					added: function(doc, beforeIndex){
-						console.log("added")
 						if(!Session.equals("gameID", null)){
 							game = doc;
 							board = game.board;
@@ -169,7 +141,6 @@
 						}
 					},
 					changed: function(newDoc, oldDoc){
-						console.log("changed")
 						if(!Session.equals("gameID", null)){
 							oldboard = board 
 							game = newDoc;
@@ -208,10 +179,6 @@
 			}
 		}
 		
-		Template.creategame.loading = function(){
-			console.log(handle.ready())
-			// return handle.ready();
-		}
 
 		Template.scoreboard.currentUser = function(){
 			if(Meteor.userId() == this._id){

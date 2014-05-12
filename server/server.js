@@ -141,7 +141,9 @@
 			Meteor.users.update({}, {$set:{"profile.revealed":0}}, {multi: true})
 
 		},
-
+		leaveGame: function(gameID, userID){
+			Game.update( gameID, {$pull: { players: {id:userID } } });
+		},
 		joinGame: function(gameID, userID){
 
 			//Remove user if exists to avoid duplications

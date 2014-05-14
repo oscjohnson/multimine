@@ -24,7 +24,9 @@
 
 	Meteor.startup(function() {
 		// If the user accidently refreshes page
-		 Session.set("gameID", localStorage.getItem("gameID"));
+		if(localStorage.getItem("gameID") != "null"){
+			Session.set("gameID", localStorage.getItem("gameID"));
+		} 
 	});
 
   	Template.creategame.events({
@@ -165,7 +167,6 @@
 				curs.observe({
 
 					added: function(doc, beforeIndex){
-						console.log("added")
 						if(!Session.equals("gameID", null)){
 							game = doc;
 							board = game.board;
@@ -174,7 +175,6 @@
 						}
 					},
 					changed: function(newDoc, oldDoc){
-						console.log("changed")
 						if(!Session.equals("gameID", null)){
 							oldboard = board 
 							game = newDoc;
@@ -214,7 +214,6 @@
 		}
 		
 		Template.creategame.loading = function(){
-			console.log(handle.ready())
 			// return handle.ready();
 		}
 

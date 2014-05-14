@@ -12,12 +12,12 @@
 			</div>
 			<ul class="games-available">
 				{{#each game}}
-				<li class="game-listitem" data-game="{{_id}}">
+				<li class="game-listitem">
 					<b class="gamename" title="{{gameName}}">{{gameName}}</b>
 
 					<span class="gamesize">({{width}} x {{height}})</span> 
 					
-					<span class="players">3/7</span>
+					<span class="players">{{numPlayers}}/8</span>
 					<div class="clearfix"></div>
 				</li>
 				{{/each}}

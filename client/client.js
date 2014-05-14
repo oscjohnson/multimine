@@ -6,7 +6,6 @@
 	var curs;
 
 	Deps.autorun(function(){
-		game.board
 		if(!Session.equals('gameID', undefined)){
 			localStorage.setItem('gameID', Session.get('gameID'))
 		}
@@ -127,11 +126,15 @@
 				Router.go('create');
 			},
 			'click .game-listitem': function(e){
-				var $this = $(e.target);
-				var gameid = $this.data('game');
-				Meteor.call('joinGame', gameid, Meteor.userId());
-				Session.set('gameID', gameid);
-				Router.go('game');
+				var gameID = this._id;
+				Meteor.call('joinGame', gameID, Meteor.userId(), function(err, response){
+					if(err)
+						console.log(err)
+					else{
+						Session.set('gameID', gameID);
+						Router.go('game');
+					}
+				});
 			}
 
 		});
@@ -140,13 +143,16 @@
 			return Game.find();
 		}
 
+		Template.lobby.numPlayers = function(){
+			return this.players.length;
+		}
+
 		/*
 		Runs once as the template got rendered.
 		*/
 	  	Template.game.rendered = function() {
 
 	  			curs = Game.find();
-	  			
 				curs.observe({
 
 					added: function(doc, beforeIndex){

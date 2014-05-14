@@ -1,3 +1,4 @@
+
 .lobby-wrapper h1{
 	float: left;
 	margin-bottom: 20px;
@@ -42,11 +43,11 @@
 }
 	.games-available-wrapper .header .game{
 		display: inline-block;
-		width: 260px;
+		width: 320px;
 	}
 
 	.games-available-wrapper .header .size{
-		margin-left: 16px; 
+		margin-left: 115px; 
 	}
 	
 
@@ -68,8 +69,15 @@
 	list-style-type: none;
 }
 	.game-listitem .gamename{
-		display: inline-block;
-		width: 260px;
+		display: block;
+		overflow-x:hidden; 
+		margin-right: 20px;
+		width: 400px;
+		float: left;
+	}
+	.game-listitem .size{
+		margin-left: 40px;
+		float: left;
 	}
 
 	.game-listitem .players{

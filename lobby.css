@@ -1,0 +1,87 @@
+.lobby-wrapper h1{
+	float: left;
+	margin-bottom: 20px;
+
+}
+.lobby-wrapper h4{
+	margin-bottom: 8px;
+}
+
+.lobby-wrapper{
+	width: 800px;
+	padding: 60px;
+	margin: 0 auto;
+	margin-top: 40px;
+
+
+
+	border: 1px solid #eee;
+
+	/*padding: 20px 100px;*/
+	border: 1px solid #ddd;
+	padding-bottom: 60px;
+
+	background: #ffffff; /* Old browsers */
+	background: -moz-radial-gradient(center, ellipse cover, #ffffff 0%, #eeeeee 100%); /* FF3.6+ */
+	background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#ffffff), color-stop(100%,#eeeeee)); /* Chrome,Safari4+ */
+	background: -webkit-radial-gradient(center, ellipse cover, #ffffff 0%,#eeeeee 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-radial-gradient(center, ellipse cover, #ffffff 0%,#eeeeee 100%); /* Opera 12+ */
+	background: -ms-radial-gradient(center, ellipse cover, #ffffff 0%,#eeeeee 100%); /* IE10+ */
+	background: radial-gradient(ellipse at center, #ffffff 0%,#eeeeee 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#eeeeee',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+
+	-webkit-transition: all 2s;
+
+
+}
+.games-available-wrapper .header{
+	background: #888;
+	color: white;
+	padding: 7px 10px;
+
+}
+	.games-available-wrapper .header .game{
+		display: inline-block;
+		width: 260px;
+	}
+
+	.games-available-wrapper .header .size{
+		margin-left: 16px; 
+	}
+	
+
+	.games-available-wrapper .header .players{
+
+		float: right;
+	}
+
+.games-available{
+	height: 360px;
+	overflow-y: auto;
+	border: 1px solid #888;
+	margin-bottom: 20px;
+}
+
+.game-listitem{
+	padding: 10px;
+	cursor: default;
+	list-style-type: none;
+}
+	.game-listitem .gamename{
+		display: inline-block;
+		width: 260px;
+	}
+
+	.game-listitem .players{
+		float: right;
+		margin-right: 20px;
+	}
+
+.game-listitem:hover{
+	background: #60BAD1;
+
+}
+
+.lobby-wrapper #login-buttons{
+	float: right; 
+}

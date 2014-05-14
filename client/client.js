@@ -49,7 +49,10 @@
 							  }		
 						});
   			
-  		}
+  		},
+	  		'click #back' : function(){
+	  			Router.go('lobby');
+	  	}
   	});
 
   	Template.login.rendered = function(){
@@ -126,6 +129,7 @@
 				Session.set('gameID', gameid);
 				Router.go('game');
 			}
+
 		});
 
 		Template.lobby.game = function(){

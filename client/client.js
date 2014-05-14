@@ -39,6 +39,9 @@
   				case "large": side = 35; break;
   			}
   			name = $('.creategame-wrapper input[name="gameName"]').val();
+  			if(name == ""){
+  				name = $('input[name="gameName"]').attr('placeholder')
+  			}
   			Meteor.call('createBoard',name, Meteor.userId(), side, side, function(err, data){
 							if(err){
 								console.log(err)
@@ -137,6 +140,10 @@
 
 		Template.lobby.game = function(){
 			return Game.find();
+		}
+
+		Template.lobby.numPlayers = function(){
+			return this.players.length;
 		}
 
 		/*

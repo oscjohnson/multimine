@@ -11,6 +11,20 @@ body{
 	font-family: Offside;
 }
 
+.background{
+	background: #ffffff; /* Old browsers */
+	background: -moz-radial-gradient(center, ellipse cover, #ffffff 0%, #eeeeee 100%); /* FF3.6+ */
+	background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#ffffff), color-stop(100%,#eeeeee)); /* Chrome,Safari4+ */
+	background: -webkit-radial-gradient(center, ellipse cover, #ffffff 0%,#eeeeee 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-radial-gradient(center, ellipse cover, #ffffff 0%,#eeeeee 100%); /* Opera 12+ */
+	background: -ms-radial-gradient(center, ellipse cover, #ffffff 0%,#eeeeee 100%); /* IE10+ */
+	background: radial-gradient(ellipse at center, #ffffff 0%,#eeeeee 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#eeeeee',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+
+
+}
+
+
 .selected{
 	background: red;
 	padding: 10px;
@@ -100,25 +114,11 @@ body{
 .creategame-wrapper{
 	font-family: Offside;
 	width:600px;
-	border: 1px solid #eee;
 	margin: 0 auto;
 	padding: 20px 100px;
 	margin-top: 40px;
 	border: 1px solid #ddd;
 	padding-bottom: 60px;
-
-	background: #ffffff; /* Old browsers */
-	background: -moz-radial-gradient(center, ellipse cover, #ffffff 0%, #eeeeee 100%); /* FF3.6+ */
-	background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#ffffff), color-stop(100%,#eeeeee)); /* Chrome,Safari4+ */
-	background: -webkit-radial-gradient(center, ellipse cover, #ffffff 0%,#eeeeee 100%); /* Chrome10+,Safari5.1+ */
-	background: -o-radial-gradient(center, ellipse cover, #ffffff 0%,#eeeeee 100%); /* Opera 12+ */
-	background: -ms-radial-gradient(center, ellipse cover, #ffffff 0%,#eeeeee 100%); /* IE10+ */
-	background: radial-gradient(ellipse at center, #ffffff 0%,#eeeeee 100%); /* W3C */
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#eeeeee',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
-
-	-webkit-transition: all 2s;
-
-
 
 }
 
@@ -195,6 +195,22 @@ input[name="gameName"]{
 .select-board-size li.selected{
 	background: #60BAD1;
 }
+
+#back{
+	border: 1px solid #ddd;
+	color:#333;
+	width: 600px ;
+	margin: 0 auto;
+	margin-top: 30px;
+	font-size: 20px;
+	padding: 20px;
+	display: block;
+
+}
+#back:hover{
+	color: #60BAD1;
+}
+
 
 /* END Create game template styling */
 

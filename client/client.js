@@ -25,7 +25,9 @@
 
 	Meteor.startup(function() {
 		// If the user accidently refreshes page
-		 Session.set("gameID", localStorage.getItem("gameID"));
+		if(localStorage.getItem("gameID") != "null"){
+			Session.set("gameID", localStorage.getItem("gameID"));
+		} 
 	});
 
   	Template.creategame.events({
@@ -187,6 +189,7 @@
 			}
 		}
 		
+
 
 		Template.scoreboard.currentUser = function(){
 			if(Meteor.userId() == this._id){

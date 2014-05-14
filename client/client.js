@@ -6,11 +6,15 @@
 	var curs;
 
 	Deps.autorun(function(){
-
+		game.board
+		if(!Session.equals('gameID', undefined)){
+			localStorage.setItem('gameID', Session.get('gameID'))
+		}
 		Meteor.subscribe('allUsers');
 		if(!Meteor.userId()){
 			Meteor.call('logoutUser', userid);
 			Session.set("gameID", null)
+			// localStorage.setItem('gameID', null);
 		}else{
 			userid = Meteor.userId();
 		}
@@ -18,7 +22,10 @@
 
 	Meteor.subscribe('allUsers');
 	  	
+
 	Meteor.startup(function() {
+		// If the user accidently refreshes page
+		 Session.set("gameID", localStorage.getItem("gameID"));
 	});
 
   	Template.creategame.events({
@@ -172,9 +179,10 @@
 				});
 		};
 		Template.scoreboard.user = function(){
-			if(Meteor.users.find().fetch()[0] !== undefined){
-
-				return Meteor.users.find({}, {sort: {"profile.score": -1 }});
+			if(Meteor.users.find().fetch()[0] !== undefined && game.players != undefined){
+				// console.log(game.players)
+				return Meteor.users.find({_id: { $in : game.players }}, {sort: {"profile.score": -1 }});
+				// return Meteor.users.find({}, {sort: {"profile.score": -1 }});
 
 			}
 		}
@@ -189,9 +197,10 @@
 		}
 
 		Template.name.name = function(){
-			if(Meteor.users.find().fetch()[0] !== undefined){
+			if(Meteor.users.find().fetch()[0] !== undefined){ //check if data 
 				var email= Meteor.users.find( this._id  ).fetch()[0].emails[0].address;
 				email =email.split('@')
+
 				return email[0];
 			}
 		}

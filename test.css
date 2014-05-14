@@ -192,6 +192,12 @@ body{
 		padding: 5px;
 		cursor: default;
 	}
+
+	.game-listitem:hover{
+		color: #60BAD1;
+		background: rgba(96,186, 209, 0.3);
+		/*background: #efefef;*/
+	}
 	.select-board-size li{
 		cursor: pointer;
 		padding: 10px;

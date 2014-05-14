@@ -1,6 +1,4 @@
 jQuery(document).ready(function() {
-	console.log('ui.js')
-
 	// $('body').css('display', 'none');
 	// $('body').fadeIn('fast');
 

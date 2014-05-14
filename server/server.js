@@ -19,7 +19,7 @@
 				return Game.find(gameID);
 			}
 			else
-				return Game.find({},{fields: {'gameName': 1, 'hostName': 1}});
+				return Game.find({},{fields: {'gameName': 1, 'hostName': 1, 'width': 1, 'height': 1,'players': 1}});
 		}
 	});
 
@@ -68,7 +68,7 @@
 				}
 			} 
 			
-			var players= [{id: hostName}];
+			var players= [hostName];
 			
 			
 			
@@ -142,14 +142,14 @@
 
 		},
 		leaveGame: function(gameID, userID){
-			Game.update( gameID, {$pull: { players: {id:userID } } });
+			Game.update( gameID, {$pull: { players: userID  } });
 		},
 		joinGame: function(gameID, userID){
 
 			//Remove user if exists to avoid duplications
-			Game.update( gameID, {$pull: { players: {id:userID } } });
+			Game.update( gameID, {$pull: { players: userID  } });
 			//Insert user
-			Game.update( gameID, {$push: { players: {id:userID } } });
+			Game.update( gameID, {$push: { players: userID } });
 
 		},
 		consoleLog: function(message){

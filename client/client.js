@@ -30,6 +30,7 @@
 		} 
 	});
 
+
   	Template.creategame.events({
   		'click #createGame' : function(){
   			size = $('.creategame-wrapper .select-board-size .selected').data('size');

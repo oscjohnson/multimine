@@ -11,12 +11,12 @@
 .lobby-wrapper{
 	width: 800px;
 	padding: 60px;
-	margin: 0 auto;
-	margin-top: 40px;
+	margin: 40px auto;
 
 	/*padding: 20px 100px;*/
 	border: 1px solid #ddd;
 	padding-bottom: 60px;
+
 }
 
 

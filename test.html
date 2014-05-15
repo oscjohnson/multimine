@@ -2,15 +2,15 @@
 
 	<link href='http://fonts.googleapis.com/css?family=Offside' rel='stylesheet' type='text/css'>
 
-  	<!-- {{> creategame}} -->
-	<!-- {{> loginButtons}} -->
 
-	<!-- {{> scoreboard}} -->
 </body>
 
 <template name="login">
-	<h1>Please login to play</h1>
-	{{> loginButtons}}
+	<div class="index-wrapper">
+		<h1>Welcome to multimine</h1>
+		{{> loginButtons}}
+
+	</div>
 </template>
 
 <template name="game">
@@ -29,10 +29,10 @@
 	<div id="scoreboard">
 		
 			<div class="header">
-		<h1>scoreboard</h1>
+				<h1>scoreboard</h1>
+				<h3>{{gamename}}</h3>
 				<div class="name">Name</div>
 				<div class="score">Score</div>
-
 			</div>
 		{{#each user}}
 			<div class="user {{currentUser}}">

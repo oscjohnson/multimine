@@ -81,6 +81,10 @@ body{
 	float:left;
 }
 
+#scoreboard h3{
+	text-align: center;
+}
+
 #scoreboard .header div{
 	display: inline-block;	
 }
@@ -211,9 +215,16 @@ input[name="gameName"]{
 	color: #60BAD1;
 }
 
+.index-wrapper h1{
+	text-align: center;
+	margin: 40px 0;
 
-/* END Create game template styling */
-
+}
+.index-wrapper #login-buttons{
+	display: block;
+	width: 74px;
+	margin: 0 auto;
+}
 
 
 

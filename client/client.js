@@ -203,7 +203,11 @@
 			}
 		}
 		
-
+		Template.scoreboard.gamename = function(){
+			if(Game.find().fetch()[0] !== undefined){
+				return Game.find().fetch()[0].gameName;
+			}
+		}
 
 		Template.scoreboard.currentUser = function(){
 			if(Meteor.userId() == this._id){

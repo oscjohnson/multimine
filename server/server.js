@@ -143,6 +143,8 @@
 		},
 		leaveGame: function(gameID, userID){
 			Game.update( gameID, {$pull: { players: userID  } });
+			//Temporary fix for presentation
+			Meteor.users.update(userID, {$set:{"profile.score":0}});
 		},
 		joinGame: function(gameID, userID){
 

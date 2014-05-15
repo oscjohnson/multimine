@@ -243,12 +243,19 @@
 function rightCanvasSize(){
 
 	var canvas =document.getElementById('gameCanvas');
-	canvas.width = game.width*sizepadding;
-	canvas.height = game.height*sizepadding;
+	canvas.width = game.width*sizepadding -padding;
+	canvas.height = game.height*sizepadding -padding;
 
 	var canvas =document.getElementById('overlayCanvas');
-	canvas.width = game.width*sizepadding;
-	canvas.height = game.height*sizepadding;
+	canvas.width = game.width*sizepadding -padding;
+	canvas.height = game.height*sizepadding -padding;
+
+	// 6 for border on canvas div
+	// 270 for scoreboard width
+	// and 6 for margin 
+	$('.game-wrapper').width(canvas.width + 276 + 6) 
+
+
 }
 
 function render(o){
@@ -440,22 +447,18 @@ function renderBorder(x,y,color){
 }
 
 function getCanvasCoordinates(e){
-	var x;
-	var y;
-	var gCanvasElement = document.getElementById('overlayCanvas');
 
-	if (e.pageX || e.pageY) { 
+
+	if (e.offsetX == undefined) { 
 	  x = e.pageX;
 	  y = e.pageY;
 	}
 	else { 
-	  x = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft; 
-	  y = e.clientY + document.body.scrollTop + document.documentElement.scrollTop; 
+	  x = e.offsetX;
+	  y = e.offsetY;
 	} 
-	x -= gCanvasElement.offsetLeft;
-	y -= gCanvasElement.offsetTop;
 
-	return {x:x,y:y};
+	return {x:e.offsetX,y:e.offsetY};
 }
 
 

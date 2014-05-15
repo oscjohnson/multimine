@@ -14,14 +14,19 @@
 </template>
 
 <template name="game">
-	<div class="canvas-wrapper">
-		<canvas id="gameCanvas" width="1000" height="1000"></canvas>
-		<canvas id="overlayCanvas" width="1000" height="1000"></canvas>
+	<div class="game-wrapper not-selectable">
+		<div class="canvas-wrapper">
+			<canvas id="gameCanvas" width="1000" height="1000"></canvas>
+			<canvas id="overlayCanvas" width="1000" height="1000"></canvas>
+		</div>
+	<div class="scoreboard-wrapper">
+		
+		{{> scoreboard}}
+		<button id="back">Leave game</button>
 	</div>
-	<button id="back">Leave game</button>
+		
+	</div>
 
-	{{> scoreboard}}
-	{{> loginButtons}}
 </template>
 
 
@@ -29,8 +34,8 @@
 	<div id="scoreboard">
 		
 			<div class="header">
-				<h1>scoreboard</h1>
-				<h3>{{gamename}}</h3>
+				<h1>{{gamename}}</h1>
+
 				<div class="name">Name</div>
 				<div class="score">Score</div>
 			</div>

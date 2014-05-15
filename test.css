@@ -24,7 +24,14 @@ body{
 
 }
 
-
+.not-selectable{
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
 .selected{
 	background: red;
 	padding: 10px;
@@ -49,9 +56,7 @@ body{
 	float: right;
 }
 
-.canvas-wrapper{
-	position: relative;
-}
+
 #overlayCanvas{
 	z-index: 1;
 	position: absolute;
@@ -59,17 +64,11 @@ body{
 	left: 0px;
 }
 #gameCanvas{
+	display: block;
 	z-index: -1;
 }
 
-#scoreboard{
-	position: fixed;
-	top: 0px;
-	right: 0px;
-	width: 300px;
-	font-family: Offside;
 
-}
 
 #scoreboard .header{
 	padding: 15px;
@@ -115,7 +114,7 @@ body{
 
 /* Create game template styling */
 
-.creategame-wrapper{
+.creategame{
 	font-family: Offside;
 	width:600px;
 	margin: 0 auto;
@@ -127,7 +126,7 @@ body{
 }
 
 
-.creategame-wrapper h4{
+.creategame h4{
 	margin-bottom: 8px;
 }
 
@@ -181,7 +180,7 @@ input[name="gameName"]{
 
 }
 
-.creategame-wrapper .hint{
+.creategame .hint{
 	background: rgba(255,0,0,0.7);
 	padding: 5px;
 	color: white;
@@ -200,7 +199,7 @@ input[name="gameName"]{
 	background: #60BAD1;
 }
 
-#back{
+.creategame-wrapper .backbutton{
 	border: 1px solid #ddd;
 	color:#333;
 	width: 600px ;
@@ -226,9 +225,45 @@ input[name="gameName"]{
 	margin: 0 auto;
 }
 
+/* Game.html Styling */
+
+.game-wrapper{
+	margin: 30px auto;
+
+}
+
+.canvas-wrapper{
+	border: 3px solid black;
+	vertical-align: bottom;
+	display: inline-block;
+	position: relative;
+}
 
 
+.scoreboard-wrapper{
+	vertical-align: top;
+	display: inline-block;
+	width: 270px;
+}
 
+#scoreboard{
+	font-family: Offside;
 
+}
+.scoreboard-wrapper #back{
+	width: 270px;
+	cursor: pointer;
+	font-family: Offside;
+	text-align: center;
+	width: 100%;
+	font-size: 20px;
+	color: white;
+	background: #aaa;
+	border: 0;
+	display: block;
+	
+}
+
+/* END Game.html Styling */
 
 

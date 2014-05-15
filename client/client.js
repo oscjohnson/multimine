@@ -19,9 +19,6 @@
 		}
 	})
 
-	Meteor.subscribe('allUsers');
-	  	
-
 	Meteor.startup(function() {
 		// If the user accidently refreshes page
 		if(localStorage.getItem("gameID") != "null"){

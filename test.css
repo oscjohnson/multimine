@@ -56,6 +56,13 @@ body{
 	float: right;
 }
 
+#clickCanvas{
+
+	z-index: 2;
+	position: absolute;
+	top: 3px;
+	left: 3px;
+}
 
 #overlayCanvas{
 	z-index: 1;
@@ -228,7 +235,7 @@ input[name="gameName"]{
 /* Game.html Styling */
 
 .game-wrapper{
-	margin: 30px auto;
+	margin: 60px auto;
 
 }
 
@@ -236,9 +243,11 @@ input[name="gameName"]{
 	border: 3px solid black;
 	vertical-align: bottom;
 	display: inline-block;
-	position: relative;
 }
-
+.outer-canvas-wrapper{
+	position: relative;
+	display: inline-block;
+}
 
 .scoreboard-wrapper{
 	vertical-align: top;

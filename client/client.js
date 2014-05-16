@@ -4,6 +4,7 @@
 	var startTime;
 	var apm = 0;
 	var curs;
+	var overlayCanvasOffset = 50;
 
 	Deps.autorun(function(){
 		if(!Session.equals('gameID', undefined)){
@@ -60,7 +61,7 @@
   	}
 
   	Template.game.events({
-  		'click #overlayCanvas' : function(e){
+  		'click #clickCanvas' : function(e){
   			var c = getCanvasCoordinates(e);
   			var coord = getBoardXY(c);
   			queryObject = {};
@@ -89,7 +90,7 @@
   			apm++;
 
   		},
-  		'contextmenu #overlayCanvas' : function(e){
+  		'contextmenu #clickCanvas' : function(e){
   			e.preventDefault();
   			var coord =getCanvasCoordinates(e);
   			var c = getBoardXY(getCanvasCoordinates(e));
@@ -239,18 +240,32 @@
 
 function rightCanvasSize(){
 
+
+	var canvas =document.getElementById('clickCanvas');
+	canvas.width = game.width*sizepadding -padding;
+	canvas.height = game.height*sizepadding -padding;
+
 	var canvas =document.getElementById('gameCanvas');
 	canvas.width = game.width*sizepadding -padding;
 	canvas.height = game.height*sizepadding -padding;
 
 	var canvas =document.getElementById('overlayCanvas');
-	canvas.width = game.width*sizepadding -padding;
-	canvas.height = game.height*sizepadding -padding;
+	canvas.width = game.width*sizepadding -padding + 2* overlayCanvasOffset;
+	canvas.height = game.height*sizepadding -padding + 2* overlayCanvasOffset;
+
+	var bordersize = + $('.canvas-wrapper').css('border-left-width')
+						.substring(this.length-1, this.length+1);
+	
+
+
+	document.getElementById('overlayCanvas').style.top = -overlayCanvasOffset + bordersize +"px";
+	document.getElementById('overlayCanvas').style.left = -overlayCanvasOffset + bordersize +"px";
+
 
 	// 6 for border on canvas div
 	// 270 for scoreboard width
 	// and 6 for margin 
-	$('.game-wrapper').width(canvas.width + 276 + 6) 
+	$('.game-wrapper').width(canvas.width + 276 + bordersize) 
 
 
 }
@@ -285,6 +300,11 @@ function failanimation(c){
 }
 
 function printPoints(c, score){
+	x = c.x;
+	y = c.y;
+
+	x += overlayCanvasOffset;
+	y += overlayCanvasOffset;
 
 	var globalID = requestAnimationFrame(repeatOften);
 
@@ -329,9 +349,9 @@ function printPoints(c, score){
 
 		context.strokeStyle = "rgba(" + 255 + ", "+ 255 +", "+ 255 +", "+  (0.004*r).toPrecision(2)  +")";
 		context.lineWidth = 3;
-      	context.strokeText(score,c.x + offSetX, c.y + offSetY);
+      	context.strokeText(score, x + offSetX, y + offSetY);
 
-		context.fillText(score, c.x + offSetX, c.y + offSetY);
+		context.fillText(score, x + offSetX, y + offSetY);
 		
 		globalID = requestAnimationFrame(repeatOften);
 	  	if(r< 1){
@@ -453,9 +473,11 @@ function getCanvasCoordinates(e){
 	else { 
 	  x = e.offsetX;
 	  y = e.offsetY;
-	} 
-
-	return {x:e.offsetX,y:e.offsetY};
+	}
+	x //-= overlayCanvasOffset - padding;
+	y //-= overlayCanvasOffset - padding;
+	console.log(x,y)
+	return {x:x,y:y};
 }
 
 

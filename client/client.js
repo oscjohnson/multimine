@@ -41,6 +41,7 @@
   			if(name == ""){
   				name = $('input[name="gameName"]').attr('placeholder')
   			}
+  			
   			Meteor.call('createBoard',name, Meteor.userId(), side, side, function(err, data){
 							if(err){
 								console.log(err)
@@ -62,6 +63,7 @@
 
   	Template.game.events({
   		'click #clickCanvas' : function(e){
+  			
   			var c = getCanvasCoordinates(e);
   			var coord = getBoardXY(c);
   			queryObject = {};
@@ -85,9 +87,11 @@
 		  					printPoints(c, score.leftwin);
 		  				}
 	  			}
+
 	  			Meteor.call('updateBoard',Session.get('gameID'), coord, queryObject);
   			}
   			apm++;
+  			
 
   		},
   		'contextmenu #clickCanvas' : function(e){
@@ -303,9 +307,6 @@ function printPoints(c, score){
 	x = c.x;
 	y = c.y;
 
-	x += overlayCanvasOffset;
-	y += overlayCanvasOffset;
-
 	var globalID = requestAnimationFrame(repeatOften);
 
 	var canvas = document.getElementById('overlayCanvas');
@@ -449,7 +450,7 @@ function renderSquare(x,y){
 function paintOverlay(){
 			var x = 2.5, y= 2.5, color ="#FF0";
 
-			var gameCanvas = $("#overlayCanvas");
+			var gameCanvas = $("#clickCanvas");
 			var context = gameCanvas[0].getContext('2d');
 			context.fillStyle = color;
 			context.fillRect(x*sizepadding, y*sizepadding, size, size);
@@ -474,9 +475,9 @@ function getCanvasCoordinates(e){
 	  x = e.offsetX;
 	  y = e.offsetY;
 	}
-	x //-= overlayCanvasOffset - padding;
-	y //-= overlayCanvasOffset - padding;
-	console.log(x,y)
+	//x -= overlayCanvasOffset - padding;
+	//y -= overlayCanvasOffset - padding;
+
 	return {x:x,y:y};
 }
 

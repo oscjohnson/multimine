@@ -9,7 +9,6 @@
 		if(!Session.equals('gameID', undefined)){
 			localStorage.setItem('gameID', Session.get('gameID'))
 		}
-		Meteor.subscribe('allUsers');
 		if(!Meteor.userId()){
 			Meteor.call('logoutUser', userid);
 			Session.set("gameID", null)
@@ -17,7 +16,7 @@
 		}else{
 			userid = Meteor.userId();
 		}
-	})
+	})	
 
 	Meteor.startup(function() {
 		// If the user accidently refreshes page
@@ -36,9 +35,6 @@
   				case "large": side = 35; break;
   			}
   			name = $('.creategame-wrapper input[name="gameName"]').val();
-  			if(name == ""){
-  				name = $('input[name="gameName"]').attr('placeholder')
-  			}
   			Meteor.call('createBoard',name, Meteor.userId(), side, side, function(err, data){
 							if(err){
 								console.log(err)
@@ -66,7 +62,7 @@
 
   			//Om det behövs uppdateras gör det.
   			if(board[coord.x+'_'+coord.y].checked == '0'){
-
+  				
 	  			var o =discover(coord);
 	  			
 	  			var queryObject = buildQuery(o);
@@ -153,7 +149,7 @@
 
 					added: function(doc, beforeIndex){
 						if(!Session.equals("gameID", null)){
-							game = doc;
+							game = doc;	
 							board = game.board;
 							rightCanvasSize();
 							renderBoard(board)
@@ -191,15 +187,10 @@
 				});
 		};
 		Template.scoreboard.user = function(){
-			if(Meteor.users.find().fetch()[0] !== undefined && game.players != undefined){
-				// console.log(game.players)
-				return Meteor.users.find({_id: { $in : game.players }}, {sort: {"profile.score": -1 }});
-				// return Meteor.users.find({}, {sort: {"profile.score": -1 }});
-
+			if(Game.find().fetch()[0] != undefined ){
+				return Game.find({}, {fields: {players:  1}}).fetch()[0].players;;
 			}
 		}
-		
-
 
 		Template.scoreboard.currentUser = function(){
 			if(Meteor.userId() == this._id){
@@ -209,26 +200,25 @@
 			}
 		}
 
-		Template.name.name = function(){
-			if(Meteor.users.find().fetch()[0] !== undefined){ //check if data 
-				var email= Meteor.users.find( this._id  ).fetch()[0].emails[0].address;
-				email =email.split('@')
 
-				return email[0];
-			}
-		}
+		// Template.name.name = function(){
+		// 	if(Meteor.users.find().fetch()[0] !== undefined){ //check if data 
+		// 		var email= Meteor.users.find( this._id  ).fetch()[0].emails[0].address;
+		// 		email =email.split('@')
 
-		Template.score.score = function(){
-			if(Meteor.users.find().fetch()[0] !== undefined){
-				return Meteor.users.find( this._id  ).fetch()[0].profile.score
-			}
-		}
+		// 		return email[0];
+		// 	}
+		// }
 
-		Template.revealed.revealed = function(){
-			//if(Meteor.users.find().fetch()[0] !== undefined){
-				return Meteor.users.find( this._id  ).fetch()[0].profile.revealed
-		//	}
-		}	
+		// Template.score.score = function(){
+		// 		return Meteor.users.find( this._id  ).fetch()[0].profile.score
+		// }
+
+		// Template.revealed.revealed = function(){
+		// 	//if(Meteor.users.find().fetch()[0] !== undefined){
+		// 		return Meteor.users.find( this._id  ).fetch()[0].profile.revealed
+		// //	}
+		// }	
 // Functions
 
 

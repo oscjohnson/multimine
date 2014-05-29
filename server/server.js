@@ -23,8 +23,12 @@
 		}
 	});
 
-	Meteor.publish('allUsers', function(args){
-		return Meteor.users.find({"profile.online": true}, {fields:{'emails':1, 'profile.score': 1, 'profile.revealed': 1}});
+	Meteor.publish('allUsers', function(gameID){
+
+		var players = Game.find(gameID).fetch()[0].players;
+		return Meteor.users.find({_id: { $in : players}}, 
+									  {fields:{'emails': 1, 'profile.score': 1, 'profile.revealed': 1}},
+									  {sort: {"profile.score": -1 }});
 	});
 
 	// Deny cowboy inserts and updates
@@ -64,13 +68,18 @@
 			for(var i = 0; i < width; i++){
 				for(var j = 0; j < height; j++){
 					_board[i+'_'+j].surroundingMines = checkSurroundingsForMines(_board, {x:i, y:j});
-
 				}
 			} 
+
+			var o = {};
+			o.id = _hostName;
+			o.points = 0;
+			var email = Meteor.users.find({_id: _hostName}, {fields: {'emails.address': 1}}).fetch()[0].emails[0].address;
+			o.name = email.split("@")[0];
 			
-			var players= [hostName];
-			
-			
+			var players = [];
+			players.push(o);
+
 			
 			return Game.insert({
 						gameName: _gameName, 
@@ -99,10 +108,12 @@
 				var key = "board." + x + "_" + y + ".checked";
 				var action = {};
 				action[key] = 2;
-	 			Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":score.rightwin}})
+
+	 			Game.update({_id: _gameID, "players.id": Meteor.user()._id}, {$inc:{"players.$.points": score.rightwin}})
 				Game.update(_gameID,{$set: action})
 			}else{
-				Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":score.rightfail}})
+				Game.update({_id: _gameID, "players.id": Meteor.user()._id}, {$inc:{"players.$.points": score.rightfail}})
+
 			}
 
 		},
@@ -110,24 +121,25 @@
 
 			var revealsize= + Object.size(queryObject);
 			
-			// var key = "board." + coordinates.x + "_" + coordinates.y + ".isMine";
-			// var action = {};
-			// action[key]
 
 			var find = Game.find(_gameID).fetch()
 			var isMine =find[0].board[coordinates.x+'_'+coordinates.y].isMine;
 
 			if(isMine ==1){
-				Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":score.leftfail}})
+
+				Game.update({_id: _gameID, "players.id": Meteor.user()._id}, {$inc:{"players.$.points": score.leftfail}})
 			}else{
 				if(revealsize > 5){
-					Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":score.reveal}})	
+					Game.update({_id: _gameID, "players.id": Meteor.user()._id}, {$inc:{"players.$.points": score.reveal}})
 				}else{
-					Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":score.leftwin}})	
+
+					Game.update({_id: _gameID, "players.id": Meteor.user()._id}, {$inc:{"players.$.points": score.leftwin}})
+					//Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":score.leftwin}})	
 				}
 
 			}
-			Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.revealed":revealsize}})	
+			Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.revealed":revealsize}})
+
 			Game.update(_gameID,{$set: queryObject})
 		
 
@@ -142,14 +154,20 @@
 
 		},
 		leaveGame: function(gameID, userID){
-			Game.update( gameID, {$pull: { players: userID  } });
+			Game.update( gameID, {$pull: { players: {id : userID}} });
 		},
 		joinGame: function(gameID, userID){
 
 			//Remove user if exists to avoid duplications
-			Game.update( gameID, {$pull: { players: userID  } });
+			Meteor.call('leaveGame',gameID, userID); 
 			//Insert user
-			Game.update( gameID, {$push: { players: userID } });
+			var o = {};
+			o.id = userID;
+			o.points = 0;
+			var email = Meteor.users.find({_id: userID}, {fields: {'emails.address': 1}}).fetch()[0].emails[0].address;
+			o.name = email.split("@")[0];
+
+			Game.update( gameID, {$push: { players: o } });
 
 		},
 		consoleLog: function(message){

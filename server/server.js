@@ -155,6 +155,7 @@
 		},
 		leaveGame: function(gameID, userID){
 			Game.update( gameID, {$pull: { players: {id : userID}} });
+
 		},
 		joinGame: function(gameID, userID){
 

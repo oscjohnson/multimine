@@ -2,26 +2,35 @@
 
 	<link href='http://fonts.googleapis.com/css?family=Offside' rel='stylesheet' type='text/css'>
 
-  	<!-- {{> creategame}} -->
-	<!-- {{> loginButtons}} -->
 
-	<!-- {{> scoreboard}} -->
 </body>
 
 <template name="login">
-	<h1>Please login to play</h1>
-	{{> loginButtons}}
+	<div class="index-wrapper">
+		<h1>Welcome to multimine</h1>
+		{{> loginButtons}}
+
+	</div>
 </template>
 
 <template name="game">
-	<div class="canvas-wrapper">
-		<canvas id="gameCanvas" width="1000" height="1000"></canvas>
-		<canvas id="overlayCanvas" width="1000" height="1000"></canvas>
+	
+	<div class="game-wrapper not-selectable">
+<div class="outer-canvas-wrapper">
+		<div class="canvas-wrapper">
+			<canvas id="gameCanvas" width="1000" height="1000"></canvas>
+			<canvas id="overlayCanvas" width="1000" height="1000"></canvas>
+			<canvas id="clickCanvas" width="1000" height="1000"></canvas>
+		</div>
+</div>
+	<div class="scoreboard-wrapper">
+		
+		{{> scoreboard}}
+		<button id="back">Leave game</button>
 	</div>
-	<button id="back">Leave game</button>
+		
+	</div>
 
-	{{> scoreboard}}
-	{{> loginButtons}}
 </template>
 
 
@@ -29,10 +38,10 @@
 	<div id="scoreboard">
 		
 			<div class="header">
-		<h1>scoreboard</h1>
+				<h1>{{gamename}}</h1>
+
 				<div class="name">Name</div>
 				<div class="score">Score</div>
-
 			</div>
 		{{#each user}}
 			<div class="user {{currentUser}}">

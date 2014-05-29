@@ -4,6 +4,7 @@
 	var startTime;
 	var apm = 0;
 	var curs;
+	var overlayCanvasOffset = 50;
 
 	Deps.autorun(function(){
 		if(!Session.equals('gameID', undefined)){
@@ -25,6 +26,7 @@
 		} 
 	});
 
+
   	Template.creategame.events({
   		'click #createGame' : function(){
   			size = $('.creategame-wrapper .select-board-size .selected').data('size');
@@ -35,6 +37,11 @@
   				case "large": side = 35; break;
   			}
   			name = $('.creategame-wrapper input[name="gameName"]').val();
+
+  			if(name == ""){
+  				name = $('input[name="gameName"]').attr('placeholder')
+  			}
+  			
   			Meteor.call('createBoard',name, Meteor.userId(), side, side, function(err, data){
 							if(err){
 								console.log(err)
@@ -55,7 +62,8 @@
   	}
 
   	Template.game.events({
-  		'click #overlayCanvas' : function(e){
+  		'click #clickCanvas' : function(e){
+  			
   			var c = getCanvasCoordinates(e);
   			var coord = getBoardXY(c);
   			queryObject = {};
@@ -79,12 +87,14 @@
 		  					printPoints(c, score.leftwin);
 		  				}
 	  			}
+
 	  			Meteor.call('updateBoard',Session.get('gameID'), coord, queryObject);
   			}
   			apm++;
+  			
 
   		},
-  		'contextmenu #overlayCanvas' : function(e){
+  		'contextmenu #clickCanvas' : function(e){
   			e.preventDefault();
   			var coord =getCanvasCoordinates(e);
   			var c = getBoardXY(getCanvasCoordinates(e));
@@ -191,6 +201,13 @@
 				return Game.find({}, {fields: {players:  1}}).fetch()[0].players;;
 			}
 		}
+		
+		Template.scoreboard.gamename = function(){
+			if(Game.find().fetch()[0] !== undefined){
+				return Game.find().fetch()[0].gameName;
+			}
+		}
+
 
 		Template.scoreboard.currentUser = function(){
 			if(Meteor.userId() == this._id){
@@ -224,13 +241,34 @@
 
 function rightCanvasSize(){
 
+
+	var canvas =document.getElementById('clickCanvas');
+	canvas.width = game.width*sizepadding -padding;
+	canvas.height = game.height*sizepadding -padding;
+
 	var canvas =document.getElementById('gameCanvas');
-	canvas.width = game.width*sizepadding;
-	canvas.height = game.height*sizepadding;
+	canvas.width = game.width*sizepadding -padding;
+	canvas.height = game.height*sizepadding -padding;
 
 	var canvas =document.getElementById('overlayCanvas');
-	canvas.width = game.width*sizepadding;
-	canvas.height = game.height*sizepadding;
+	canvas.width = game.width*sizepadding -padding + 2* overlayCanvasOffset;
+	canvas.height = game.height*sizepadding -padding + 2* overlayCanvasOffset;
+
+	var bordersize = + $('.canvas-wrapper').css('border-left-width')
+						.substring(this.length-1, this.length+1);
+	
+
+
+	document.getElementById('overlayCanvas').style.top = -overlayCanvasOffset + bordersize +"px";
+	document.getElementById('overlayCanvas').style.left = -overlayCanvasOffset + bordersize +"px";
+
+
+	// 6 for border on canvas div
+	// 270 for scoreboard width
+	// and 6 for margin 
+	$('.game-wrapper').width(canvas.width + 276 + bordersize) 
+
+
 }
 
 function render(o){
@@ -263,6 +301,8 @@ function failanimation(c){
 }
 
 function printPoints(c, score){
+	x = c.x;
+	y = c.y;
 
 	var globalID = requestAnimationFrame(repeatOften);
 
@@ -307,9 +347,9 @@ function printPoints(c, score){
 
 		context.strokeStyle = "rgba(" + 255 + ", "+ 255 +", "+ 255 +", "+  (0.004*r).toPrecision(2)  +")";
 		context.lineWidth = 3;
-      	context.strokeText(score,c.x + offSetX, c.y + offSetY);
+      	context.strokeText(score, x + offSetX, y + offSetY);
 
-		context.fillText(score, c.x + offSetX, c.y + offSetY);
+		context.fillText(score, x + offSetX, y + offSetY);
 		
 		globalID = requestAnimationFrame(repeatOften);
 	  	if(r< 1){
@@ -407,7 +447,7 @@ function renderSquare(x,y){
 function paintOverlay(){
 			var x = 2.5, y= 2.5, color ="#FF0";
 
-			var gameCanvas = $("#overlayCanvas");
+			var gameCanvas = $("#clickCanvas");
 			var context = gameCanvas[0].getContext('2d');
 			context.fillStyle = color;
 			context.fillRect(x*sizepadding, y*sizepadding, size, size);
@@ -422,20 +462,18 @@ function renderBorder(x,y,color){
 }
 
 function getCanvasCoordinates(e){
-	var x;
-	var y;
-	var gCanvasElement = document.getElementById('overlayCanvas');
 
-	if (e.pageX || e.pageY) { 
+
+	if (e.offsetX == undefined) { 
 	  x = e.pageX;
 	  y = e.pageY;
 	}
 	else { 
-	  x = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft; 
-	  y = e.clientY + document.body.scrollTop + document.documentElement.scrollTop; 
-	} 
-	x -= gCanvasElement.offsetLeft;
-	y -= gCanvasElement.offsetTop;
+	  x = e.offsetX;
+	  y = e.offsetY;
+	}
+	//x -= overlayCanvasOffset - padding;
+	//y -= overlayCanvasOffset - padding;
 
 	return {x:x,y:y};
 }

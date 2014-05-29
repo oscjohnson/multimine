@@ -1,0 +1,59 @@
+<body>
+
+	<link href='http://fonts.googleapis.com/css?family=Offside' rel='stylesheet' type='text/css'>
+
+  	<!-- {{> creategame}} -->
+	<!-- {{> loginButtons}} -->
+
+	<!-- {{> scoreboard}} -->
+</body>
+
+<template name="login">
+	<h1>Please login to play</h1>
+	{{> loginButtons}}
+</template>
+
+<template name="game">
+	<div class="canvas-wrapper">
+		<canvas id="gameCanvas" width="1000" height="1000"></canvas>
+		<canvas id="overlayCanvas" width="1000" height="1000"></canvas>
+	</div>
+	<button id="back">Leave game</button>
+
+	{{> scoreboard}}
+	{{> loginButtons}}
+</template>
+
+
+<template name="scoreboard">
+	<div id="scoreboard">
+		
+			<div class="header">
+		<h1>scoreboard</h1>
+				<div class="name">Name</div>
+				<div class="score">Score</div>
+
+			</div>
+		{{#each user}}
+			<div class="user {{currentUser}}">
+				<div class="name"> {{name}}</div>
+				<div class="info-item score"> {{points}}</div>
+			</div>
+
+		{{/each}}
+		<div class="clearfix"></div>
+	</div>
+</template>
+
+<!-- <template name="name">
+	{{name}}
+</template>
+
+<template name="score">
+	{{score}}
+</template> -->
+
+<!-- <template name="revealed">
+	{{revealed}}
+</template> -->
+

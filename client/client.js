@@ -70,7 +70,8 @@
 
   			//Om det behövs uppdateras gör det.
   			if(board[coord.x+'_'+coord.y].checked == '0'){
-  				
+
+  				board[coord.x+'_'+coord.y].checked =1;
 	  			var o =discover(coord);
 	  			
 	  			var queryObject = buildQuery(o);
@@ -216,29 +217,8 @@
 
 			}
 		}
-
-
-		// Template.name.name = function(){
-		// 	if(Meteor.users.find().fetch()[0] !== undefined){ //check if data 
-		// 		var email= Meteor.users.find( this._id  ).fetch()[0].emails[0].address;
-		// 		email =email.split('@')
-
-		// 		return email[0];
-		// 	}
-		// }
-
-		// Template.score.score = function(){
-		// 		return Meteor.users.find( this._id  ).fetch()[0].profile.score
-		// }
-
-		// Template.revealed.revealed = function(){
-		// 	//if(Meteor.users.find().fetch()[0] !== undefined){
-		// 		return Meteor.users.find( this._id  ).fetch()[0].profile.revealed
-		// //	}
-		// }	
+	
 // Functions
-
-
 function rightCanvasSize(){
 
 
@@ -301,8 +281,9 @@ function failanimation(c){
 }
 
 function printPoints(c, score){
-	x = c.x;
-	y = c.y;
+
+	var x = c.x;
+	var y = c.y;
 
 	var globalID = requestAnimationFrame(repeatOften);
 
@@ -316,8 +297,8 @@ function printPoints(c, score){
 	var fontsize = Math.round(1.5*size)+ "px";
 	var r,g,b;
 
-	var offSetX = 0;
-	var offSetY = -30;
+	var offSetX = +50;
+	var offSetY = +30;
 	if(score > 0){
 		r = 255;
 		g = 190;
@@ -330,6 +311,7 @@ function printPoints(c, score){
 	}
 
 	function repeatOften() {
+
 		r-=3;
 		speed -=8;
 		greycolor = 0;
@@ -462,7 +444,8 @@ function renderBorder(x,y,color){
 }
 
 function getCanvasCoordinates(e){
-
+	var x;
+	var y;
 
 	if (e.offsetX == undefined) { 
 	  x = e.pageX;
@@ -472,8 +455,6 @@ function getCanvasCoordinates(e){
 	  x = e.offsetX;
 	  y = e.offsetY;
 	}
-	//x -= overlayCanvasOffset - padding;
-	//y -= overlayCanvasOffset - padding;
 
 	return {x:x,y:y};
 }

@@ -1,224 +1,230 @@
 
-	var board;
-	var userid;
-	var startTime;
-	var apm = 0;
-	var curs;
-	var overlayCanvasOffset = 50;
+// Global variables = bad practice
+var board;
+var userid;
+var startTime;
+var apm = 0;
+var curs;
+var overlayCanvasOffset = 50;
 
-	Deps.autorun(function(){
-		if(!Session.equals('gameID', undefined)){
-			localStorage.setItem('gameID', Session.get('gameID'))
+// Setting localStorage if gameID changes, avoiding loss of data if user
+// accidently refreshes page and cleaning up data if user decides to log out.
+Deps.autorun(function(){
+	if(!Session.equals('gameID', undefined)){
+		localStorage.setItem('gameID', Session.get('gameID'))
+	}
+	if(!Meteor.userId()){
+		Meteor.call('logoutUser', userid);
+		Session.set("gameID", null)
+	} else{
+		userid = Meteor.userId();
+	}
+})	
+
+Meteor.startup(function() {
+
+	// Pick up latest gameID if user accidently refreshes page.
+	if(localStorage.getItem("gameID") != "null"){
+		Session.set("gameID", localStorage.getItem("gameID"));
+	} 
+});
+
+/* TEMPLATES */
+
+// Handling the event when the user clicks the creategame button, telling the server
+// to create a new game with the correct size.
+Template.creategame.events({
+	'click #createGame' : function(){
+		size = $('.creategame-wrapper .select-board-size .selected').data('size');
+		var size;
+		switch(size){
+			case "small": side = 15; break;
+			case "medium": side = 25; break;
+			case "large": side = 35; break;
 		}
-		if(!Meteor.userId()){
-			Meteor.call('logoutUser', userid);
-			Session.set("gameID", null)
-			// localStorage.setItem('gameID', null);
-		}else{
-			userid = Meteor.userId();
-		}
-	})	
+		name = $('.creategame-wrapper input[name="gameName"]').val();
 
-	Meteor.startup(function() {
-		// If the user accidently refreshes page
-		if(localStorage.getItem("gameID") != "null"){
-			Session.set("gameID", localStorage.getItem("gameID"));
-		} 
-	});
-
-
-  	Template.creategame.events({
-  		'click #createGame' : function(){
-  			size = $('.creategame-wrapper .select-board-size .selected').data('size');
-  			var size;
-  			switch(size){
-  				case "small": side = 15; break;
-  				case "medium": side = 25; break;
-  				case "large": side = 35; break;
-  			}
-  			name = $('.creategame-wrapper input[name="gameName"]').val();
-
-  			if(name == ""){
-  				name = $('input[name="gameName"]').attr('placeholder')
-  			}
-  			
-  			Meteor.call('createBoard',name, Meteor.userId(), side, side, function(err, data){
-							if(err){
-								console.log(err)
-							} else{
-								Session.set('gameID', data);
-								Router.go('game')
-							  }		
-						});
-  			
-  		},
-	  		'click #back' : function(){
-	  			Router.go('lobby');
-	  	}
-  	});
-
-  	Template.login.rendered = function(){
-  		Router.go('lobby');
-  	}
-
-  	Template.game.events({
-  		'click #clickCanvas' : function(e){
-  			
-  			var c = getCanvasCoordinates(e);
-  			var coord = getBoardXY(c);
-  			queryObject = {};
-
-  			//Om det behövs uppdateras gör det.
-  			if(board[coord.x+'_'+coord.y].checked == '0'){
-
-  				board[coord.x+'_'+coord.y].checked =1;
-	  			var o =discover(coord);
-	  			
-	  			var queryObject = buildQuery(o);
-	  			render(o)
-
-	  			if(board[coord.x+'_'+coord.y].isMine == '1'){
-	  				//mine fail
-	  				printPoints(c, score.leftfail)
-	  			}else{
-	  				//mine win
-		  				if(Object.size(o) > 5){
-		  					printPoints(c, score.reveal);
-		  				}else{
-		  					printPoints(c, score.leftwin);
-		  				}
-	  			}
-
-	  			Meteor.call('updateBoard',Session.get('gameID'), coord, queryObject);
-  			}
-  			apm++;
-  			
-
-  		},
-  		'contextmenu #clickCanvas' : function(e){
-  			e.preventDefault();
-  			var coord =getCanvasCoordinates(e);
-  			var c = getBoardXY(getCanvasCoordinates(e));
-
-  			if(board[c.x+'_'+c.y].checked == '0'){
-
-	  			if(board[c.x +'_'+ c.y].isMine == 1){
-	  				//desarmerat mina
-	  				board[c.x+'_'+c.y].checked =2;
-	  				renderSquare(c.x,c.y)
-	  				printPoints(coord, score.rightwin)
-	  			}else{
-	  				failanimation(c);
-	  				printPoints(coord, score.rightfail);
-	  			}
-	  			Meteor.call('rightClick',Session.get('gameID'), c);
-	  		}
-	  			apm++;
-	  	},
-	  		'click #back' : function(){
-	  			Router.go('lobby');
-	  		}
-	  	});
-
-		Template.lobby.rendered = function(){
-
-		}
-
-		Template.lobby.events({
-			'click #createGame': function(){
-				Router.go('create');
-			},
-			'click .game-listitem': function(e){
-				var gameID = this._id;
-				Meteor.call('joinGame', gameID, Meteor.userId(), function(err, response){
-					if(err)
-						console.log(err)
-					else{
-						Session.set('gameID', gameID);
-						Router.go('game');
-					}
-				});
-			}
-
-		});
-
-		Template.lobby.game = function(){
-			return Game.find();
-		}
-
-		Template.lobby.numPlayers = function(){
-			return this.players.length;
-		}
-
-		/*
-		Runs once as the template got rendered.
-		*/
-	  	Template.game.rendered = function() {
-
-	  			curs = Game.find();
-				curs.observe({
-
-					added: function(doc, beforeIndex){
-						if(!Session.equals("gameID", null)){
-							game = doc;	
-							board = game.board;
-							rightCanvasSize();
-							renderBoard(board)
-						}
-					},
-					changed: function(newDoc, oldDoc){
-						if(!Session.equals("gameID", null)){
-							oldboard = board 
-							game = newDoc;
-							board = game.board;
-							var positions = [];
-			
-							//Stitch
-							for (var i = 0; i < game.width; i++) {
-								for (var j = 0; j < game.height; j++) {
-									if((oldboard[i+"_"+j].checked == 1) && (board[i+"_"+j].checked == 0)){
-										board[i+"_"+j].checked = 1;
-									}
-									else if((oldboard[i+"_"+j].checked == 2) && (board[i+"_"+j].checked == 0)){
-										board[i+"_"+j].checked = 2;
-									}
-
-									if(board[i+"_"+j].checked == 1 && (oldboard[i+"_"+j].checked == 0)){
-										positions.push( {x:i, y:j} );
-									}
-									else if(board[i+"_"+j].checked == 2 && (oldboard[i+"_"+j].checked == 0)){
-										positions.push( {x:i, y:j} );
-									}
-
-				  				};	  			
-				  			};
-							render(positions);
-						}
-					}
-				});
-		};
-		Template.scoreboard.user = function(){
-			if(Game.find().fetch()[0] != undefined ){
-				return Game.find({}, {fields: {players:  1}}).fetch()[0].players;;
-			}
+		if(name == ""){
+			name = $('input[name="gameName"]').attr('placeholder')
 		}
 		
-		Template.scoreboard.gamename = function(){
-			if(Game.find().fetch()[0] !== undefined){
-				return Game.find().fetch()[0].gameName;
-			}
-		}
+		Meteor.call('createBoard',name, Meteor.userId(), side, side, function(err, data){
+					if(err){
+						console.log(err)
+					} else{
+						Session.set('gameID', data);
+						Router.go('game')
+					  }		
+				});
+		
+	},
+		'click #back' : function(){
+			Router.go('lobby');
+	}
+});
 
+Template.login.rendered = function(){
+	Router.go('lobby');
+}
 
-		Template.scoreboard.currentUser = function(){
-			if(Meteor.userId() == this._id){
-
-				return "currentUser";
-
-			}
-		}
+Template.game.events({
+'click #clickCanvas' : function(e){
 	
-// Functions
+	var c = getCanvasCoordinates(e);
+	var coord = getBoardXY(c);
+	queryObject = {};
+
+	//Om det behövs uppdateras gör det.
+	if(board[coord.x+'_'+coord.y].checked == '0'){
+
+		board[coord.x+'_'+coord.y].checked =1;
+		var o =discover(coord);
+		
+		var queryObject = buildQuery(o);
+		render(o)
+
+		if(board[coord.x+'_'+coord.y].isMine == '1'){
+			//mine fail
+			printPoints(c, score.leftfail)
+		}else{
+			//mine win
+				if(Object.size(o) > 5){
+					printPoints(c, score.reveal);
+				}else{
+					printPoints(c, score.leftwin);
+				}
+		}
+
+		Meteor.call('updateBoard',Session.get('gameID'), coord, queryObject);
+	}
+	apm++;
+	
+
+},
+'contextmenu #clickCanvas' : function(e){
+	e.preventDefault();
+	var coord =getCanvasCoordinates(e);
+	var c = getBoardXY(getCanvasCoordinates(e));
+
+	if(board[c.x+'_'+c.y].checked == '0'){
+
+		if(board[c.x +'_'+ c.y].isMine == 1){
+			//desarmerat mina
+			board[c.x+'_'+c.y].checked =2;
+			renderSquare(c.x,c.y)
+			printPoints(coord, score.rightwin)
+		}else{
+			failanimation(c);
+			printPoints(coord, score.rightfail);
+		}
+		Meteor.call('rightClick',Session.get('gameID'), c);
+	}
+		apm++;
+},
+	'click #back' : function(){
+		Router.go('lobby');
+	}
+});
+
+Template.lobby.events({
+	'click #createGame': function(){
+		Router.go('create');
+	},
+	'click .game-listitem': function(e){
+		var gameID = this._id;
+		
+		// Joining a game and render the game template if join was done successfully.
+		Meteor.call('joinGame', gameID, Meteor.userId(), function(err, response){
+			if(err)
+				console.log(err)
+			else{
+				Session.set('gameID', gameID);
+				Router.go('game');
+			}
+		});
+	}
+});
+
+Template.lobby.game = function(){
+	return Game.find();
+}
+
+Template.lobby.numPlayers = function(){
+	return this.players.length;
+}
+
+// Runs as the game template is rendered.
+Template.game.rendered = function() {
+
+		curs = Game.find();
+		curs.observe({
+
+			added: function(doc, beforeIndex){
+				if(!Session.equals("gameID", null)){
+					game = doc;	
+					board = game.board;
+					rightCanvasSize();
+					renderBoard(board)
+				}
+			},
+
+			// Triggered once there is a change of the current game,
+			// e.g. another client clicked on a square.
+			changed: function(newDoc, oldDoc){
+				if(!Session.equals("gameID", null)){
+					oldboard = board 
+					game = newDoc;
+					board = game.board;
+					var positions = [];
+
+					//Stitching remote game with local game so nothing is missed when rendered.
+					for (var i = 0; i < game.width; i++) {
+						for (var j = 0; j < game.height; j++) {
+							if((oldboard[i+"_"+j].checked == 1) && (board[i+"_"+j].checked == 0)){
+								board[i+"_"+j].checked = 1;
+							}
+							else if((oldboard[i+"_"+j].checked == 2) && (board[i+"_"+j].checked == 0)){
+								board[i+"_"+j].checked = 2;
+							}
+
+							if(board[i+"_"+j].checked == 1 && (oldboard[i+"_"+j].checked == 0)){
+								positions.push( {x:i, y:j} );
+							}
+							else if(board[i+"_"+j].checked == 2 && (oldboard[i+"_"+j].checked == 0)){
+								positions.push( {x:i, y:j} );
+							}
+
+		  				};	  			
+		  			};
+
+		  			// Render the changes
+					render(positions);
+			}
+		}
+	});
+};
+Template.scoreboard.user = function(){
+	if(Game.find().fetch()[0] != undefined ){
+		return Game.find({}, {fields: {players:  1}}).fetch()[0].players;
+	}
+}
+
+Template.scoreboard.gamename = function(){
+	if(Game.find().fetch()[0] !== undefined){
+		return Game.find().fetch()[0].gameName;
+	}
+}
+
+Template.scoreboard.currentUser = function(){
+	if(Meteor.userId() == this._id){
+
+		return "currentUser";
+
+	}
+}
+	
+/* FUNCTIONS */
+
 function rightCanvasSize(){
 
 
@@ -308,9 +314,9 @@ function printPoints(c, score){
 		r = 255;
 		g = 0;
 		b = 0;
-	}
+}
 
-	function repeatOften() {
+function repeatOften() {
 
 		r-=3;
 		speed -=8;
@@ -492,7 +498,7 @@ function discover(clickedSquare){
 var recCounter =0;
 var positions = [];
 
-	function discoverField(clickedSquare){
+function discoverField(clickedSquare){
 			var	number = + board[clickedSquare.x+'_'+clickedSquare.y].surroundingMines;
 
 
@@ -551,5 +557,5 @@ var positions = [];
 
 		}
 		return discoverField(clickedSquare);
-	}
+}
 

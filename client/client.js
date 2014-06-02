@@ -1,3 +1,7 @@
+/*
+	Client logic in here.
+*/
+
 
 // Global variables = bad practice
 var board;
@@ -34,6 +38,7 @@ Meteor.startup(function() {
 // Handling the event when the user clicks the creategame button, telling the server
 // to create a new game with the correct size.
 Template.creategame.events({
+	//Creates a game on the server with parameters specified in the form.
 	'click #createGame' : function(){
 		size = $('.creategame-wrapper .select-board-size .selected').data('size');
 		var size;
@@ -68,22 +73,24 @@ Template.login.rendered = function(){
 }
 
 Template.game.events({
-'click #clickCanvas' : function(e){
+'click #clickCanvas' : function(e){ //LeftClick
 	
+	//Get clicked square
 	var c = getCanvasCoordinates(e);
 	var coord = getBoardXY(c);
-	queryObject = {};
+	var pos = board[coord.x+'_'+coord.y];
 
-	//Om det behövs uppdateras gör det.
-	if(board[coord.x+'_'+coord.y].checked == '0'){
 
-		board[coord.x+'_'+coord.y].checked =1;
+	//Check if square is already clicked
+	if(pos.checked == '0'){
+
+		pos.checked =1;
 		var o =discover(coord);
 		
 		var queryObject = buildQuery(o);
 		render(o)
 
-		if(board[coord.x+'_'+coord.y].isMine == '1'){
+		if(pos.isMine == '1'){
 			//mine fail
 			printPoints(c, score.leftfail)
 		}else{
@@ -95,33 +102,42 @@ Template.game.events({
 				}
 		}
 
+		//Call to server update database
 		Meteor.call('updateBoard',Session.get('gameID'), coord, queryObject);
 	}
 	apm++;
 	
 
 },
-'contextmenu #clickCanvas' : function(e){
+'contextmenu #clickCanvas' : function(e){ //RightClick
 	e.preventDefault();
+
+	//Get clicked square
 	var coord =getCanvasCoordinates(e);
 	var c = getBoardXY(getCanvasCoordinates(e));
+	var pos = board[c.x+'_'+c.y];
 
-	if(board[c.x+'_'+c.y].checked == '0'){
+	//Undiscovered square
+	if(pos.checked == '0'){
 
-		if(board[c.x +'_'+ c.y].isMine == 1){
-			//desarmerat mina
-			board[c.x+'_'+c.y].checked =2;
+		//Found mine
+		if(pos.isMine == 1){
+			pos.checked =2;
 			renderSquare(c.x,c.y)
-			printPoints(coord, score.rightwin)
-		}else{
+			printPoints(coord, score.rightwin);
+
+		}else{//Wrong guess, no mine!
 			failanimation(c);
 			printPoints(coord, score.rightfail);
 		}
+
+		//Call to server update database
 		Meteor.call('rightClick',Session.get('gameID'), c);
 	}
 		apm++;
 },
-	'click #back' : function(){
+
+'click #back' : function(){
 		Router.go('lobby');
 	}
 });
@@ -180,17 +196,20 @@ Template.game.rendered = function() {
 					//Stitching remote game with local game so nothing is missed when rendered.
 					for (var i = 0; i < game.width; i++) {
 						for (var j = 0; j < game.height; j++) {
-							if((oldboard[i+"_"+j].checked == 1) && (board[i+"_"+j].checked == 0)){
-								board[i+"_"+j].checked = 1;
+							var oldpos = oldboard[i+"_"+j];
+							var pos = board[i+"_"+j];
+
+							if((oldpos.checked == 1) && (pos.checked == 0)){
+								pos.checked = 1;
 							}
-							else if((oldboard[i+"_"+j].checked == 2) && (board[i+"_"+j].checked == 0)){
-								board[i+"_"+j].checked = 2;
+							else if((oldpos.checked == 2) && (pos.checked == 0)){
+								pos.checked = 2;
 							}
 
-							if(board[i+"_"+j].checked == 1 && (oldboard[i+"_"+j].checked == 0)){
+							if(pos.checked == 1 && (oldpos.checked == 0)){
 								positions.push( {x:i, y:j} );
 							}
-							else if(board[i+"_"+j].checked == 2 && (oldboard[i+"_"+j].checked == 0)){
+							else if(pos.checked == 2 && (oldpos.checked == 0)){
 								positions.push( {x:i, y:j} );
 							}
 
@@ -225,6 +244,9 @@ Template.scoreboard.currentUser = function(){
 	
 /* FUNCTIONS */
 
+/*
+	Initializes all the canvases with right width, height and offsets.
+*/
 function rightCanvasSize(){
 
 
@@ -244,19 +266,15 @@ function rightCanvasSize(){
 						.substring(this.length-1, this.length+1);
 	
 
-
 	document.getElementById('overlayCanvas').style.top = -overlayCanvasOffset + bordersize +"px";
 	document.getElementById('overlayCanvas').style.left = -overlayCanvasOffset + bordersize +"px";
 
-
-	// 6 for border on canvas div
-	// 270 for scoreboard width
-	// and 6 for margin 
 	$('.game-wrapper').width(canvas.width + 276 + bordersize) 
 
 
 }
 
+//Render all the squares given.
 function render(o){
 	for (var i = 0; i < o.length; i++) {
 		renderSquare(o[i].x, o[i].y);
@@ -264,7 +282,7 @@ function render(o){
 
 }
 
-
+//Animation for wrong guess of a mine.
 function failanimation(c){
 	var globalID = requestAnimationFrame(repeatOften);
 
@@ -286,6 +304,7 @@ function failanimation(c){
 
 }
 
+//Animation of score points
 function printPoints(c, score){
 
 	var x = c.x;
@@ -314,9 +333,9 @@ function printPoints(c, score){
 		r = 255;
 		g = 0;
 		b = 0;
-}
+	}
 
-function repeatOften() {
+	function repeatOften() {
 
 		r-=3;
 		speed -=8;
@@ -348,20 +367,20 @@ function repeatOften() {
 
 }
 
-
+//Render how many mines is surrounding this square
 function printletter(x,y, content,color,textcolor){
 	var gameCanvas = $("#gameCanvas");
 	var context = gameCanvas[0].getContext('2d');
+	var fontsize = Math.round(0.6*size)+ "px";
 
 	fillSquare(x,y, color)
 	context.fillStyle = textcolor;
-	var fontsize = Math.round(0.6*size)+ "px";
 	context.font = "bold "+ fontsize +" Arial";
 	context.fillText(content, Math.round(0.33*size) + x*sizepadding, Math.round(0.73*size) + y*sizepadding);
 }
 
 
-
+//Render all the squares of the board
 function renderBoard(board){
 	
 	for(pos in board){
@@ -375,8 +394,7 @@ function renderBoard(board){
 		
 }
 
-
-
+//Builds the Query of which positions to alter in database
 function buildQuery(positions){
 	var query = {}
 	for (var i = 0; i < positions.length; i++) {
@@ -388,59 +406,60 @@ function buildQuery(positions){
 
 function renderSquare(x,y){
 
-		var pos = x+"_"+y;
+	var pos = x+"_"+y;
 
-			var green = "#4a4";
-			var red ="#a44";
+	//Colors for the board.
+	var green = "#4a4";
+	var red ="#a44";
+	var zeroground = "#eee";
+	var undiscovered = "#555";
+	var numbercolor = "#eee";
+	var textcolor = "#000";
 
+	renderBorder(x,y, "#000");
+	
+	//If mine is discovered
+	if(board[pos].checked == 1){
 
-			var zeroground = "#eee";
-			var undiscovered = "#555";
-			var numbercolor = "#eee"
-			var textcolor = "#000"
-
-			renderBorder(x,y, "#000")
-			
-			if(board[pos].checked == 1){
-
-				if(board[pos].isMine == 1){
-					fillSquare(x, y, red);
-				}else{
-					if(board[pos].surroundingMines == 0){
-						fillSquare(x,y, zeroground);
-					}else{
-						printletter(x, y, board[pos].surroundingMines, numbercolor, textcolor);
-					}
-					
-				}
-
-			}else if(board[pos].checked == 2){
-				fillSquare(x, y, green);
-			}else{
-				 // fillSquare(x, y, "#aaa");
-				if(dev){
-
-					if(board[pos].isMine == 1){
-						fillSquare(x, y, "#000");
-					}else{
-						fillSquare(x, y, undiscovered);
-					}
-				}else{
-					fillSquare(x, y, undiscovered);
-				}
-
+		//Faulty mine discovery
+		if(board[pos].isMine == 1){
+			fillSquare(x, y, red);
+		}
+		else{
+			//Blank space
+			if(board[pos].surroundingMines == 0){
+				fillSquare(x,y, zeroground);
 			}
+			//Print Number of surrounding mines
+			else{
+				printletter(x, y, board[pos].surroundingMines, numbercolor, textcolor);
+			}
+			
+		}
+
+	}
+	//If mine is discovered correctly
+	else if(board[pos].checked == 2){
+		fillSquare(x, y, green);
+	}
+	//If square is undiscovered
+	else{
+
+		if(dev){
+
+			if(board[pos].isMine == 1){
+				fillSquare(x, y, "#000");
+			}else{
+				fillSquare(x, y, undiscovered);
+			}
+		}else{
+			fillSquare(x, y, undiscovered);
+		}
+
+	}
 }
 
-function paintOverlay(){
-			var x = 2.5, y= 2.5, color ="#FF0";
-
-			var gameCanvas = $("#clickCanvas");
-			var context = gameCanvas[0].getContext('2d');
-			context.fillStyle = color;
-			context.fillRect(x*sizepadding, y*sizepadding, size, size);
-	}
-
+//Renders a border on a given sqaure and color
 function renderBorder(x,y,color){
 	var gameCanvas = $("#gameCanvas");
 	var context = gameCanvas[0].getContext('2d');
@@ -449,9 +468,9 @@ function renderBorder(x,y,color){
 	context.fillRect(size+ (x-1)*sizepadding, size + (y-1)*sizepadding, sizepadding, padding);
 }
 
+//Calculate canvas coordinates from window coordinates.
 function getCanvasCoordinates(e){
-	var x;
-	var y;
+	var x,y;
 
 	if (e.offsetX == undefined) { 
 	  x = e.pageX;
@@ -465,13 +484,14 @@ function getCanvasCoordinates(e){
 	return {x:x,y:y};
 }
 
-
+//Get board coordinates from canvas coordinates
 function getBoardXY(coordinates){
 	var xBoard  = Math.ceil(coordinates.x / sizepadding)-1;
     var yBoard  = Math.ceil(coordinates.y / sizepadding)-1;
     return {x:xBoard,y:yBoard};
 }
 
+//Paint a given board square a given color
 function fillSquare(x,y, color){
 		var gameCanvas = $("#gameCanvas");
 		var context = gameCanvas[0].getContext('2d');
@@ -479,6 +499,7 @@ function fillSquare(x,y, color){
 		context.fillRect(x*sizepadding, y*sizepadding, size, size);
 }
 
+//Paint the canvas in a color
 function paintBackground(color){
 		var gameCanvas = $("#gameCanvas");
 		var context = gameCanvas[0].getContext('2d');
@@ -486,76 +507,71 @@ function paintBackground(color){
 		context.fillRect(0, 0, gameCanvas[0].width, gameCanvas[0].height);
 }
 
-function randomRGB(){
-	r = Math.round(Math.random()*255);
-	g = Math.round(Math.random()*255);
-	b = Math.round(Math.random()*255);
-	return "rgb("+r+","+g+","+b+")";
-}
-
+//gets the positions revealed
 function discover(clickedSquare){
 
-var recCounter =0;
-var positions = [];
+	var recCounter =0;
+	var positions = [];
 
-function discoverField(clickedSquare){
-			var	number = + board[clickedSquare.x+'_'+clickedSquare.y].surroundingMines;
-
-
-			if(number == 0){
-				// Propagera, checkSurroundingsForMines
-				var xstart = clickedSquare.x;
-				var ystart = clickedSquare.y;
-				var xstop = clickedSquare.x;
-				var ystop = clickedSquare.y;
-
-				if (clickedSquare.x == 0) {
-					xstart =1;
-				}
-				if(clickedSquare.y ==0){
-					ystart= 1;
-				}
-
-				if (clickedSquare.x == game.width-1) {
-					xstop =clickedSquare.x-1;
-				}
-				if(clickedSquare.y == game.height-1){
-					ystop= clickedSquare.y-1;
-				}
+	//Recursive function to check which squares are revealed
+	function discoverField(clickedSquare){
+		var	number = + board[clickedSquare.x+'_'+clickedSquare.y].surroundingMines;
 
 
-				for (var i = xstart-1; i <= xstop+1; i++) {
-					for (var j = ystart-1; j <= ystop+1; j++) {
+		if(number == 0){
+			var xstart = clickedSquare.x;
+			var ystart = clickedSquare.y;
+			var xstop = clickedSquare.x;
+			var ystop = clickedSquare.y;
 
-						if(board[i+"_"+j].checked != '1'){
+			if (clickedSquare.x == 0) {
+				xstart =1;
+			}
+			if(clickedSquare.y ==0){
+				ystart= 1;
+			}
 
-							board[i+"_"+j].checked = '1';
-							positions.push({x: i, y:j});
+			if (clickedSquare.x == game.width-1) {
+				xstop =clickedSquare.x-1;
+			}
+			if(clickedSquare.y == game.height-1){
+				ystop= clickedSquare.y-1;
+			}
 
-							recCounter++;
-							discoverField({x:i,y:j});
-						}
-					};
+			//Check all the squares around this square
+			for (var i = xstart-1; i <= xstop+1; i++) {
+				for (var j = ystart-1; j <= ystop+1; j++) {
+
+					if(board[i+"_"+j].checked != '1'){
+
+						board[i+"_"+j].checked = '1';
+						positions.push({x: i, y:j});
+
+						recCounter++;
+						//Check recursively
+						discoverField({x:i,y:j});
+					}
 				};
-			}
-				
-			if(recCounter > 0){
-
-			recCounter=0;
-			return positions;
-
-		}else{
-			board[clickedSquare.x+"_"+clickedSquare.y].checked = '1';		
-			//single
-			positions.push({x:clickedSquare.x, y:clickedSquare.y});
-
-			return positions;
-			recCounter=0;
-
-			}
-
-
+			};
 		}
-		return discoverField(clickedSquare);
+			
+		if(recCounter > 0){
+
+		recCounter=0;
+		return positions;
+
+	}else{
+		//single
+		board[clickedSquare.x+"_"+clickedSquare.y].checked = '1';		
+		positions.push({x:clickedSquare.x, y:clickedSquare.y});
+
+		return positions;
+		recCounter=0;
+
+	}
+
+
+	}
+	return discoverField(clickedSquare);
 }
 

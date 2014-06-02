@@ -1,3 +1,8 @@
+/*
+	Server logic in here.
+*/
+
+
 // This really necessary?
 Accounts.onLogin(function(data){
 	Meteor.users.update({_id: data.user._id}, {$set:{"profile.online":true}})
@@ -86,18 +91,17 @@ Meteor.methods({
 			version: 0 
 		});
 	},
+	//Handle user rightclick action
 	rightClick: function(_gameID, coord){
 		x = coord.x;
 		y = coord.y;
 
-		// var key = "board." + x + "_" + y + ".isMine";
-		// var action = {};
-		// action[key]
-
+		//Small query gets if a mine was clicked 		
 		var find = Game.find(_gameID).fetch()
 		var isMine =find[0].board[x+'_'+y].isMine;
 
 
+		//if so give points and update everyones board.
 		if(isMine == 1){
 
 			var key = "board." + x + "_" + y + ".checked";
@@ -106,43 +110,53 @@ Meteor.methods({
 
 			Game.update({_id: _gameID, "players.id": Meteor.user()._id}, {$inc:{"players.$.points": score.rightwin}})
 			Game.update(_gameID,{$set: action})
-		}else{
+		}
+		//Remove points for the player for guessing wrong
+		else{
 			Game.update({_id: _gameID, "players.id": Meteor.user()._id}, {$inc:{"players.$.points": score.rightfail}})
 
 		}
 
 	},
+	//Handle user left click action
 	updateBoard : function(_gameID, coordinates, queryObject){
 
 		var revealsize= + Object.size(queryObject);
 		
 
+		//Small query gets if a mine was clicked 		
 		var find = Game.find(_gameID).fetch()
 		var isMine =find[0].board[coordinates.x+'_'+coordinates.y].isMine;
 
+		//if mine was clicked hand out many points
 		if(isMine ==1){
 
 			Game.update({_id: _gameID, "players.id": Meteor.user()._id}, {$inc:{"players.$.points": score.leftfail}})
 		}else{
+			//if a revealsquare was clicked handout some points 
 			if(revealsize > 5){
 				Game.update({_id: _gameID, "players.id": Meteor.user()._id}, {$inc:{"players.$.points": score.reveal}})
-			}else{
+			}
+			//otherwise give just one point
+			else{
 
 				Game.update({_id: _gameID, "players.id": Meteor.user()._id}, {$inc:{"players.$.points": score.leftwin}})
-				//Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.score":score.leftwin}})	
+	
 			}
 
 		}
 		Meteor.users.update({_id:Meteor.user()._id}, {$inc:{"profile.revealed":revealsize}})
-
+		//Update board for everyone.
 		Game.update(_gameID,{$set: queryObject})
 
 
 	},
+	//Development function for removing a game
 	clearBoard: function(_hostName){
 		Game.remove({hostName: _hostName});
 		return 0;
 	},
+	//Remove points for all users
 	removePoints: function(){
 		Meteor.users.update({}, {$set:{"profile.score":0}}, {multi: true})
 		Meteor.users.update({}, {$set:{"profile.revealed":0}}, {multi: true})
@@ -152,15 +166,17 @@ Meteor.methods({
 		Game.update( gameID, {$pull: { players: {id : userID}} });
 
 	},
+	//Adds user id and name to joined Game.
 	joinGame: function(gameID, userID){
 
 		//Remove user if exists to avoid duplications
 		Meteor.call('leaveGame',gameID, userID); 
+		
 		//Insert user
+		var email = Meteor.users.find({_id: userID}, {fields: {'emails.address': 1}}).fetch()[0].emails[0].address;
 		var o = {};
 		o.id = userID;
 		o.points = 0;
-		var email = Meteor.users.find({_id: userID}, {fields: {'emails.address': 1}}).fetch()[0].emails[0].address;
 		o.name = email.split("@")[0];
 
 		Game.update( gameID, {$push: { players: o } });

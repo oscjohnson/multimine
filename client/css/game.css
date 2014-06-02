@@ -1,0 +1,44 @@
+/* Game.html Styling */
+
+.game-wrapper{
+	margin: 60px auto;
+
+}
+
+.canvas-wrapper{
+	border: 3px solid black;
+	vertical-align: bottom;
+	display: inline-block;
+}
+.outer-canvas-wrapper{
+	position: relative;
+	display: inline-block;
+}
+
+.scoreboard-wrapper{
+	vertical-align: top;
+	display: inline-block;
+	width: 270px;
+}
+
+#scoreboard{
+	font-family: Offside;
+
+}
+.scoreboard-wrapper #back{
+	width: 270px;
+	cursor: pointer;
+	font-family: Offside;
+	text-align: center;
+	width: 100%;
+	font-size: 20px;
+	color: white;
+	background: #aaa;
+	border: 0;
+	display: block;
+	
+}
+/* END Game.html Styling */
+
+
+

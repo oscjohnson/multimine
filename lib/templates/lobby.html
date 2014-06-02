@@ -1,0 +1,30 @@
+<template name="lobby">
+	<div class="lobby-wrapper background">
+		<h1>Lobby</h1>
+		{{> loginButtons}}
+		<div class="clearfix"></div>
+		<h4>Games Available:</h4>
+		<div class="games-available-wrapper">
+			<div class="header">
+				<span class="game">Game</span>
+				<span class="size">Size</span>
+				<span class="players">Players</span>
+			</div>
+			<ul class="games-available">
+				{{#each game}}
+				<li class="game-listitem">
+					<b class="gamename" title="{{gameName}}">{{gameName}}</b>
+
+					<span class="gamesize">({{width}} x {{height}})</span> 
+					
+					<span class="players">{{numPlayers}}/8</span>
+					<div class="clearfix"></div>
+				</li>
+				{{/each}}
+			</ul>
+		</div>
+		<h4>Host game:</h4>
+		<button id="createGame">Create Game</button>
+	</div>
+	
+</template>

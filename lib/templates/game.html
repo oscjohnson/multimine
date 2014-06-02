@@ -1,0 +1,48 @@
+<!-- Containing the templates for the game and login page.	-->
+<body>
+	<link href='http://fonts.googleapis.com/css?family=Offside' rel='stylesheet' type='text/css'>
+</body>
+
+<template name="login">
+	<div class="index-wrapper">
+		<h1>Welcome to multimine</h1>
+		{{> loginButtons}}
+	</div>
+</template>
+
+<template name="game">
+	<div class="game-wrapper not-selectable">
+		<div class="outer-canvas-wrapper">
+				<div class="canvas-wrapper">
+					<canvas id="gameCanvas" width="1000" height="1000"></canvas>
+					<canvas id="overlayCanvas" width="1000" height="1000"></canvas>
+					<canvas id="clickCanvas" width="1000" height="1000"></canvas>
+				</div>
+		</div>
+		<div class="scoreboard-wrapper">
+			{{> scoreboard}}
+			<button id="back">Leave game</button>
+		</div>
+	</div>
+</template>
+
+
+<template name="scoreboard">
+	<div id="scoreboard">
+			<div class="header">
+				<h1>{{gamename}}</h1>
+
+				<div class="name">Name</div>
+				<div class="score">Score</div>
+			</div>
+		{{#each user}}
+			<div class="user {{currentUser}}">
+				<div class="name"> {{name}}</div>
+				<div class="info-item score"> {{points}}</div>
+			</div>
+		{{/each}}
+		<div class="clearfix"></div>
+	</div>
+</template>
+
+

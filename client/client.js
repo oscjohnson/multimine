@@ -499,7 +499,7 @@ function fillSquare(x,y, color){
 		context.fillRect(x*sizepadding, y*sizepadding, size, size);
 }
 
-//Paint the canvas in a color
+//Paint the whole canvas in a given color
 function paintBackground(color){
 		var gameCanvas = $("#gameCanvas");
 		var context = gameCanvas[0].getContext('2d');
@@ -507,7 +507,9 @@ function paintBackground(color){
 		context.fillRect(0, 0, gameCanvas[0].width, gameCanvas[0].height);
 }
 
-//gets the positions revealed
+/*
+	Recieves the clicked square. Returns all the squares revealed by the click.
+*/
 function discover(clickedSquare){
 
 	var recCounter =0;

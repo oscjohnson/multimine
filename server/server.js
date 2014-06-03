@@ -41,7 +41,7 @@ Game.allow({
 // This is the methods that is ued by the client to communicate with the server.
 Meteor.methods({
 
-	// Creating a board with w width and h height.
+	// Creating a board with width w and height h.
 	createBoard: function(_gameName, _hostName, w, h){
 		
 		width = w;
@@ -111,7 +111,7 @@ Meteor.methods({
 			Game.update({_id: _gameID, "players.id": Meteor.user()._id}, {$inc:{"players.$.points": score.rightwin}})
 			Game.update(_gameID,{$set: action})
 		}
-		//Remove points for the player for guessing wrong
+		//Remove from players score for guessing wrong
 		else{
 			Game.update({_id: _gameID, "players.id": Meteor.user()._id}, {$inc:{"players.$.points": score.rightfail}})
 

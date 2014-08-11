@@ -122,7 +122,7 @@ Template.game.events({
 
 		//Found mine
 		if(pos.isMine == 1){
-			pos.checked =2;
+			pos.checked = 2;
 			renderSquare(c.x,c.y)
 			printPoints(coord, score.rightwin);
 
@@ -515,12 +515,8 @@ function discover(clickedSquare){
 	var recCounter =0;
 	var positions = [];
 
-	//Recursive function to check which squares are revealed
-	function discoverField(clickedSquare){
-		var	number = + board[clickedSquare.x+'_'+clickedSquare.y].surroundingMines;
-
-
-		if(number == 0){
+	//Get right boundings for loops, checks if squares are at boards edges an compansates this.
+	function getLimits(clickedSquare){
 			var xstart = clickedSquare.x;
 			var ystart = clickedSquare.y;
 			var xstop = clickedSquare.x;
@@ -540,9 +536,36 @@ function discover(clickedSquare){
 				ystop= clickedSquare.y-1;
 			}
 
+			var limits ={};
+			var startX= xstart-1;
+			var stopX= xstop+1;
+
+			var startY = ystart-1;
+			var stopY = ystop+1;
+
+			limits.startX = startX;
+			limits.startY = startY;
+			
+			limits.stopY = stopY;
+			limits.stopX = stopX;
+
+
+			return limits;
+
+	}
+
+	//Recursive function to check which squares are revealed
+	function discoverField(clickedSquare){
+		var	number = + board[clickedSquare.x+'_'+clickedSquare.y].surroundingMines;
+
+
+		if(number == 0){
+
+			var limits = getLimits(clickedSquare);
+
 			//Check all the squares around this square
-			for (var i = xstart-1; i <= xstop+1; i++) {
-				for (var j = ystart-1; j <= ystop+1; j++) {
+			for (var i = limits.startX; i <= limits.stopX; i++) {
+				for (var j = limits.startY; j <= limits.stopY; j++) {
 
 					if(board[i+"_"+j].checked != '1'){
 
@@ -559,21 +582,23 @@ function discover(clickedSquare){
 			
 		if(recCounter > 0){
 
-		recCounter=0;
-		return positions;
+			recCounter=0;
+			return positions;
 
-	}else{
-		//single
-		board[clickedSquare.x+"_"+clickedSquare.y].checked = '1';		
-		positions.push({x:clickedSquare.x, y:clickedSquare.y});
+		}else{
 
-		return positions;
-		recCounter=0;
+			//single square
+			board[clickedSquare.x+"_"+clickedSquare.y].checked = '1';		
+			positions.push({x:clickedSquare.x, y:clickedSquare.y});
+
+			return positions;
+
+
+		}
+
 
 	}
 
-
-	}
 	return discoverField(clickedSquare);
 }
 

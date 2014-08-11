@@ -30,7 +30,7 @@ Meteor.publish('game', function(userId, gameID){
 // Deny cowboy inserts and updates
 Game.allow({
 	insert: function(){
-		return false;
+		return true;
 	},
 	update: function(){
 		return false;
@@ -183,7 +183,10 @@ Meteor.methods({
 
 	},
 	consoleLog: function(message){
-		console.log(message)
+		Meteor.createUser();
+		//Meteor.users.insert({username: 'foo', emails: ['bar@example.com'], name: 'baz', services: 
+		  //  {password: {srp: Meteor._srp.generateVerifier('password')}}});
+		//console.log(message)
 	},
 	logoutUser: function(userid){
 		Meteor.users.update({_id: userid}, {$set:{"profile.online":false}});
